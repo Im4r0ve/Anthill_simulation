@@ -18,6 +18,8 @@ public class Anthill
         this.x = x;
         this.y = y;
         this.sim = sim;
+        sim.getTile(x,y).setMaterial(Material.ANTHILL);
+
         this.reproductionRate = reproductionRate;
         for(int i = 0; i< initAnts;++i)
         {

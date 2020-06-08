@@ -45,6 +45,9 @@ public class Ant {
         if(!newTile.isBarrier())
         {
             newTile.addAnt(this);
-        };
+            y++;
+        }
+        System.out.println(x + " " + y);
+
     }
 }

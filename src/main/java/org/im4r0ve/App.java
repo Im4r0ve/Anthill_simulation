@@ -2,6 +2,7 @@ package org.im4r0ve;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,12 +23,12 @@ public class App extends Application {
         Simulating,
     }
     private States state;
-    private ImageView map;
+    private Canvas map;
     private ArrayList<Simulation> simulations;
     private ArrayList<AntGenome> antGenomes;
     private int height;
     private int width;
-
+    private boolean showMap;
     public static void main(String[] args)
     {
         launch(args);
@@ -39,17 +40,15 @@ public class App extends Application {
         //starts menu
         simulations = new ArrayList<>();
         antGenomes = new ArrayList<>();
+        showMap = true;
 
         initialize(primaryStage);
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
             antGenomes.add(new AntGenome(100,25,1,5, Color.RED));
-            simulations.add(new Simulation(loadMap(), true,1,antGenomes));
-            System.out.println("done");
-
+            simulations.add(new Simulation(loadMap(),1,antGenomes));
         }
-        System.out.println("done");
 
         state = States.Settings;
 
@@ -69,11 +68,11 @@ public class App extends Application {
     }
     public Tile[][] loadMap()
     {
-        if(map.getImage().isError())
+        /*if(map.getImage().isError())
         {
             System.out.println("Error: empty image");
             return null;
-        }
+        }*/
 
         Image image = map.getImage();
         height = (int)image.getHeight();
@@ -89,9 +88,12 @@ public class App extends Application {
                 newMap[x][y] = new Tile(color, 0);
             }
         }
-
-
         return newMap;
+    }
+    private void draw(Tile[][] newMap)
+    {
+        Image image = map.getImage();
+
     }
     private void initialize(Stage primaryStage)
     {
@@ -100,9 +102,13 @@ public class App extends Application {
         Button step = new Button("Step");
         step.setOnAction(e ->
         {
-            for(int i = 0; i < simulations.size();++i)
+            for (Simulation simulation : simulations)
             {
-                simulations.get(i).step();
+                Tile[][] newMap = simulation.step();
+                if (showMap)
+                {
+                    draw(newMap);
+                }
             }
         });
         VBox vbox = new VBox();
@@ -110,7 +116,7 @@ public class App extends Application {
                 step,
                 GUI_utils.createTextField("Strength: ", "5"));
 
-        Image defaultImage = new Image("file:resources/map.png");
+        Image defaultImage = new Image("file:resources/map2.png");
         map = new ImageView(defaultImage);
         width = (int)defaultImage.getWidth();
         height = (int)defaultImage.getHeight();
