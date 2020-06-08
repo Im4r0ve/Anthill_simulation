@@ -6,16 +6,23 @@ import java.util.ArrayList;
 
 public class Tile
 {
-    private Color color;
+    private Material initMaterial;
+    private Material material;
     private int food;
-    private boolean barrier;
     private ArrayList<Ant> ants;
 
-    public Tile(int food,boolean barrier, Color color)
+    public Tile(Material initMaterial, int food)
     {
-        this.color = color;
+        if(initMaterial == Material.FOOD)
+        {
+            this.initMaterial = Material.GRASS;
+        }
+        else
+        {
+            this.initMaterial = initMaterial;
+        }
+        this.material = initMaterial;
         this.food = food;
-        this.barrier = barrier;
         ants = new ArrayList<>();
     }
 
@@ -41,12 +48,7 @@ public class Tile
 
     public boolean isBarrier()
     {
-        return barrier;
-    }
-
-    public void setBarrier(boolean barrier)
-    {
-        this.barrier = barrier;
+        return material.isBarrier();
     }
 
     public ArrayList<Ant> getAnts()
@@ -61,5 +63,13 @@ public class Tile
     public void removeAnt(Ant ant)
     {
         ants.remove(ant);
+    }
+    public void setMaterial(Material material)
+    {
+        this.material = material;
+    }
+    public Material getMaterial()
+    {
+        return material;
     }
 }

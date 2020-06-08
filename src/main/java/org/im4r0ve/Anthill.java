@@ -5,6 +5,8 @@ import java.util.ArrayList;
 public class Anthill
 {
     private ArrayList<Ant> ants;
+    private ArrayList<ArrayList<Tile>> map;
+
     private int x;
     private int y;
     private int food;
@@ -24,7 +26,7 @@ public class Anthill
         food = 0;
     }
 
-    public void createAnt(AntGenome antGenome)
+    public void spawnAnt(AntGenome antGenome)
     {
         if (food >= antGenome.getHealth())
             ants.add(new Ant(antGenome,this));
@@ -35,7 +37,10 @@ public class Anthill
     }
     public void step()
     {
-        //update all ants
+        for(Ant ant : ants)
+        {
+            ant.step();
+        }
     }
 
     public int getFood()

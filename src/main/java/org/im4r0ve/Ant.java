@@ -1,24 +1,32 @@
 package org.im4r0ve;
 
-import javafx.geometry.Point2D;
-import javafx.scene.Node;
+import javafx.scene.paint.Color;
 
 public class Ant {
+    enum States{
+        SEARCHING,
+        CARRYING_FOOD,
+        FIGHTING
+    }
+    private States state;
+    private final Color color;
     private int x;
     private int y;
     private int health; //half of the weight
     //private int weight; //equals food at the end
     private int strength;
     private int speed;
-    private int viewRange;
+    private double viewRange;
 
     private Anthill anthill;
     private boolean alive = true;
 
     public Ant(AntGenome genome, Anthill anthill)
     {
+        state = States.SEARCHING;
         x = anthill.getX();
         y = anthill.getY();
+        color = genome.getColor();
         health = genome.getHealth();
         strength = genome.getStrength();
         speed = genome.getSpeed();
@@ -27,11 +35,16 @@ public class Ant {
     public void step()
     {
         //move up
+        Tile myTile = anthill.getSim().getTile(x,y);
+        if(myTile.getAnts().size() == 1)
+        {
+            myTile.setMaterial();
+        }
         Tile tile = anthill.getSim().getTile(x,y + 1);
         if(!tile.isBarrier())
         {
             tile.addAnt(this);
-
+            tile.setColor(Color.RED);
         };
     }
 

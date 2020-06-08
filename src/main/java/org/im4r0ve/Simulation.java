@@ -1,10 +1,7 @@
 package org.im4r0ve;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Simulation
 {
@@ -13,10 +10,10 @@ public class Simulation
 
     private boolean showMap;
 
-    private ArrayList<ArrayList<Tile>> map;
+    private Tile[][] map;
     private ArrayList<Anthill> anthills;
 
-    public Simulation(ArrayList<ArrayList<Tile>> map, boolean showMap, int initAnts, ArrayList<AntGenome> genomes) //add multiple anthills/genomes
+    public Simulation(Tile[][] map, boolean showMap, int initAnts, ArrayList<AntGenome> genomes) //add multiple anthills/genomes
     {
         this.showMap = showMap;
         this.map = map;
@@ -25,9 +22,22 @@ public class Simulation
     }
 
 
-    public void changeColor()
+    public void drawMap()
     {
+        if(showMap)
+        {
 
+        }
+    }
+    public void spawnFood()
+    {
+        Random random = new Random();
+        if(random.nextDouble() < 0.30)
+        {
+            while(map[random.nextInt(width)][random.nextInt(height)].isBarrier()){}
+
+
+        }
     }
     public Tile getTile(int row, int col)
     {
@@ -39,7 +49,7 @@ public class Simulation
             row += height;
         if (row > height)
             row %= height;
-        return map.get(row).get(col);
+        return map[row][col];
     }
 
     public void step()

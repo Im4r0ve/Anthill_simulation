@@ -37,11 +37,15 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception
     {
         //starts menu
+        simulations = new ArrayList<>();
+        antGenomes = new ArrayList<>();
+
         initialize(primaryStage);
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
-            simulations.add(new Simulation(loadMap(), true,10,antGenomes));
+            antGenomes.add(new AntGenome(100,25,1,5, color));
+            simulations.add(new Simulation(loadMap(), true,1,antGenomes));
         }
         state = States.Settings;
 
@@ -80,7 +84,7 @@ public class App extends Application {
             {
                 Color color = reader.getColor(x,y);
                 System.out.println(color);
-                row.add(new Tile(0,false,color));
+                row.add(new Tile(color, 0));
             }
             newMap.add(row);
         }
