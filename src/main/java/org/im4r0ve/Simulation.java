@@ -33,12 +33,12 @@ public class Simulation
     {
         if (col < 0)
             col += width;
-        if (col > width)
+        if (col >= width)
             col %= width;
 
         if (row < 0)
             row += height;
-        if (row > height)
+        if (row >= height)
             row %= height;
 
         return map[row][col];

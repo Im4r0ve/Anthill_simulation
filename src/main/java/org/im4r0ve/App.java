@@ -23,7 +23,8 @@ public class App extends Application {
         Simulating,
     }
     private States state;
-    private Canvas map;
+    private Canvas displayedMap;
+    private Tile[][] map;
     private ArrayList<Simulation> simulations;
     private ArrayList<AntGenome> antGenomes;
     private int height;
@@ -47,7 +48,7 @@ public class App extends Application {
         for (int i = 0; i < 1; ++i) //generations pool
         {
             antGenomes.add(new AntGenome(100,25,1,5, Color.RED));
-            simulations.add(new Simulation(loadMap(),1,antGenomes));
+            simulations.add(new Simulation(copyMap(map),1,antGenomes));
         }
 
         state = States.Settings;
@@ -66,7 +67,7 @@ public class App extends Application {
     {
         return imageView.getImage().isError();
     }
-    public Tile[][] loadMap()
+    public Tile[][] loadMap(Image image)
     {
         /*if(map.getImage().isError())
         {
@@ -74,26 +75,40 @@ public class App extends Application {
             return null;
         }*/
 
-        Image image = map.getImage();
-        height = (int)image.getHeight();
-        width = (int)image.getWidth();
         Tile[][] newMap = new Tile[width][height];
-
         var reader = image.getPixelReader();
         for(int y = 0; y < height;++y)
         {
             for(int x = 0; x < width;++x)
             {
-                Color color = reader.getColor(x,y);
-                newMap[x][y] = new Tile(color, 0);
+                newMap[x][y] = new Tile(reader.getColor(x,y), 0);
             }
         }
         return newMap;
     }
-    private void draw(Tile[][] newMap)
+    private Tile[][] copyMap(Tile[][] toCopy)
     {
-        Image image = map.getImage();
-
+        Tile[][] copy = new Tile[width][height];
+        for(int y=0; y<height; ++y)
+            for(int x=0; x<width; ++x)
+            {
+                copy[x][y] = toCopy[x][y];
+            }
+        return copy;
+    }
+    private void draw(Tile[][] map)
+    {
+        var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
+        for(int y = 0; y < height;++y)
+        {
+            for(int x = 0; x < width;++x)
+            {
+                if (map[x][y].getAnts().size() != 0)
+                    writer.setColor(x,y,map[x][y].getAnts().get(0).getColor());
+                else
+                    writer.setColor(x,y,map[x][y].getMaterial().getColor());
+            }
+        }
     }
     private void initialize(Stage primaryStage)
     {
@@ -117,13 +132,15 @@ public class App extends Application {
                 GUI_utils.createTextField("Strength: ", "5"));
 
         Image defaultImage = new Image("file:resources/map2.png");
-        map = new ImageView(defaultImage);
-        width = (int)defaultImage.getWidth();
         height = (int)defaultImage.getHeight();
+        width = (int)defaultImage.getWidth();
+        displayedMap = new Canvas(width,height);
+        map = loadMap(defaultImage);
+        draw(map);
 
         HBox hbox = new HBox();
         hbox.setSpacing(50);
-        hbox.getChildren().addAll(vbox,map);
+        hbox.getChildren().addAll(vbox,displayedMap);
         primaryStage.setScene(new Scene (hbox, width + 400, 600));
     }
 }

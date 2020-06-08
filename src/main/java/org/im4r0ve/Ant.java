@@ -3,6 +3,11 @@ package org.im4r0ve;
 import javafx.scene.paint.Color;
 
 public class Ant {
+    public Color getColor()
+    {
+        return color;
+    }
+
     enum States{
         SEARCHING,
         CARRYING_FOOD,
@@ -40,12 +45,14 @@ public class Ant {
         if(myTile.getAnts().size() == 1)
         {
             myTile.showInitMaterial();
+            myTile.removeAnt(this);
         }
-        Tile newTile = anthill.getSim().getTile(x,y + 1);
+        Tile newTile = anthill.getSim().getTile(x+1,y + 1);
         if(!newTile.isBarrier())
         {
             newTile.addAnt(this);
             y++;
+            x++;
         }
         System.out.println(x + " " + y);
 
