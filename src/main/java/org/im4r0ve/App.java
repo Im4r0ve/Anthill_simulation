@@ -44,9 +44,13 @@ public class App extends Application {
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
-            antGenomes.add(new AntGenome(100,25,1,5, color));
+            antGenomes.add(new AntGenome(100,25,1,5, Color.RED));
             simulations.add(new Simulation(loadMap(), true,1,antGenomes));
+            System.out.println("done");
+
         }
+        System.out.println("done");
+
         state = States.Settings;
 
         //thread = new Thread(this);
@@ -63,7 +67,7 @@ public class App extends Application {
     {
         return imageView.getImage().isError();
     }
-    public ArrayList<ArrayList<Tile>> loadMap()
+    public Tile[][] loadMap()
     {
         if(map.getImage().isError())
         {
@@ -74,20 +78,19 @@ public class App extends Application {
         Image image = map.getImage();
         height = (int)image.getHeight();
         width = (int)image.getWidth();
-        ArrayList<ArrayList<Tile>> newMap = new ArrayList<>();
+        Tile[][] newMap = new Tile[width][height];
 
         var reader = image.getPixelReader();
         for(int y = 0; y < height;++y)
         {
-            ArrayList<Tile> row = new ArrayList<>();
             for(int x = 0; x < width;++x)
             {
                 Color color = reader.getColor(x,y);
-                System.out.println(color);
-                row.add(new Tile(color, 0));
+                newMap[x][y] = new Tile(color, 0);
             }
-            newMap.add(row);
         }
+
+
         return newMap;
     }
     private void initialize(Stage primaryStage)

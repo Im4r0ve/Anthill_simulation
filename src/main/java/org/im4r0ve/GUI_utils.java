@@ -14,6 +14,4 @@ public class GUI_utils
         TextField textField = new TextField(defaultText);
         return (new HBox(myLabel, textField));
     }
-
-
 }

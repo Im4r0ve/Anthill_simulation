@@ -11,19 +11,32 @@ public class Tile
     private int food;
     private ArrayList<Ant> ants;
 
-    public Tile(Material initMaterial, int food)
+    public Tile(Color color, int food)
     {
-        if(initMaterial == Material.FOOD)
+        if(color == Material.FOOD.getColor())
         {
             this.initMaterial = Material.GRASS;
         }
         else
         {
-            this.initMaterial = initMaterial;
+            this.initMaterial = getMaterial(color);
         }
         this.material = initMaterial;
         this.food = food;
         ants = new ArrayList<>();
+    }
+
+    public Material getMaterial(Color color)
+    {
+        if(color.equals(Color.GREEN))
+            return Material.GRASS;
+        if(color.equals(Color.BROWN))
+            return Material.ANTHILL;
+        if(color.equals(Color.SANDYBROWN))
+            return Material.FOOD;
+        if(color.equals(Color.GRAY))
+            return Material.ROCK;
+        return null;
     }
 
     public int getFood()
@@ -71,5 +84,9 @@ public class Tile
     public Material getMaterial()
     {
         return material;
+    }
+    public void showInitMaterial()
+    {
+        material = initMaterial;
     }
 }

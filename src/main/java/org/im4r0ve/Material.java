@@ -33,23 +33,7 @@ public enum Material
             case ROCK:
                 return Color.GRAY;
             default:
-                return Color.RED;
-        }
-    }
-    public void setColor(Color color)
-    {
-        switch(color)
-        {
-            case Color.GREEN:
-                return ;
-            case Color.BROWN:
-                Material = ANTHILL;
-            case FOOD:
-                return Color.SANDYBROWN;
-            case ROCK:
-                return Color.GRAY;
-            default:
-                return Color.RED;
+                return Color.PURPLE;
         }
     }
 }

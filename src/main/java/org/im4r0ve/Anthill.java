@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class Anthill
 {
     private ArrayList<Ant> ants;
-    private ArrayList<ArrayList<Tile>> map;
 
     private int x;
     private int y;
@@ -15,6 +14,7 @@ public class Anthill
 
     public Anthill(int x,int y, int reproductionRate,int initAnts, ArrayList<AntGenome> antGenomes, Simulation sim)
     {
+        ants = new ArrayList<>();
         this.x = x;
         this.y = y;
         this.sim = sim;

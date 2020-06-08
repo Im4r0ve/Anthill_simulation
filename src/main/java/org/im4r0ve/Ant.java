@@ -31,6 +31,7 @@ public class Ant {
         strength = genome.getStrength();
         speed = genome.getSpeed();
         viewRange = genome.getViewRange();
+        this.anthill = anthill;
     }
     public void step()
     {
@@ -38,14 +39,12 @@ public class Ant {
         Tile myTile = anthill.getSim().getTile(x,y);
         if(myTile.getAnts().size() == 1)
         {
-            myTile.setMaterial();
+            myTile.showInitMaterial();
         }
-        Tile tile = anthill.getSim().getTile(x,y + 1);
-        if(!tile.isBarrier())
+        Tile newTile = anthill.getSim().getTile(x,y + 1);
+        if(!newTile.isBarrier())
         {
-            tile.addAnt(this);
-            tile.setColor(Color.RED);
+            newTile.addAnt(this);
         };
     }
-
 }
