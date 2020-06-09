@@ -92,4 +92,24 @@ public class Tile
     {
         material = initMaterial;
     }
+
+    public Tile getPrev()
+    {
+        return prev;
+    }
+
+    public void setPrev(Tile prev)
+    {
+        this.prev = prev;
+    }
+
+    public boolean isVisited()
+    {
+        return visited;
+    }
+
+    public void setVisited(boolean visited)
+    {
+        this.visited = visited;
+    }
 }

@@ -2,6 +2,10 @@ package org.im4r0ve;
 
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class Ant {
     public Color getColor()
     {
@@ -10,7 +14,7 @@ public class Ant {
 
     enum States{
         SEARCHING,
-        CARRYING_FOOD,
+        GOING_HOME,
         FIGHTING
     }
     private States state;
@@ -21,7 +25,7 @@ public class Ant {
     //private int weight; //equals food at the end
     private int strength;
     private int speed;
-    private double viewRange;
+    private float viewRange;
 
     private Anthill anthill;
     private boolean alive = true;
@@ -38,24 +42,87 @@ public class Ant {
         viewRange = genome.getViewRange();
         this.anthill = anthill;
     }
-    public void searchFood()
+
+    private ArrayList<Integer> searchArea()
     {
-        /*for(int y = this.y - viewRange; y < this.y+viewRange + 1;++y)
+        //format of the result: x,y,distance
+        ArrayList<Integer> result = new ArrayList<>();
+        Queue<Integer> xQueue = new LinkedList<>();
+        Queue<Integer> yQueue = new LinkedList<>();
+        int nodesInNextLayer = 0;
+        int nodesLeftInLayer = 1;
+        int distance = 0;
+
+        //format: North, South, East, West
+        int[] dHorizont = {0,0,1,-1};
+        int[] dVertical = {-1,1,0,0};
+
+        xQueue.add(x);
+        yQueue.add(y);
+
+        Tile myTile = anthill.getSim().getTile(x,y);
+        myTile.setVisited(true);
+        while(xQueue.size()>0 && distance <= viewRange)
         {
-            for (int x = this.x; x < this.x+viewRange + 1; ++x)
+            int newX = xQueue.remove();
+            int newY = yQueue.remove();
+            myTile = anthill.getSim().getTile(newX,newY);
+            //if there is something interesting add it to result
+            if ((myTile.getMaterial() == Material.FOOD || myTile.getAnts().size() > 0) && distance != 0) //add Anthill
             {
-                if (Math.pow(this.y - y, 2) + Math.pow(this.x - x, 2) <= Math.pow(viewRange, 2))
-                    System.out.print("x");
-                else
-                    System.out.print("_");
+                result.add(newX);
+                result.add(newY);
+                result.add(distance);
             }
-            System.out.println();
-        }*/
+
+            //add neighbors to queue
+            for (int i = 0; i < 4; ++i)
+            {
+                int neighborX = newX + dHorizont[i];
+                int neighborY = newY + dVertical[i];
+                //skips rocks
+                Tile tile = anthill.getSim().getTile(neighborX, neighborY);
+                if (!tile.isBarrier() && !tile.isVisited())
+                {
+                    xQueue.add(neighborX);
+                    yQueue.add(neighborY);
+
+                    tile.setVisited(true);
+                    tile.setPrev(myTile);
+                    nodesInNextLayer++;
+                }
+            }
+            nodesLeftInLayer--;
+            if(nodesLeftInLayer == 0)
+            {
+                nodesLeftInLayer = nodesInNextLayer;
+                nodesInNextLayer = 0;
+                distance++;
+            }
+
+        }
+        return result;
     }
     public void step()
     {
-        //move up
-        searchFood();
+        ArrayList<Integer> interests = searchArea();
+        //clean up
+        int offset = (int)Math.ceil(viewRange);
+        for (int y = this.y-offset-1; y < this.y+offset+1; y++) {
+            for (int x = this.x-offset-1; x < this.x+offset+1; x++) {
+                {
+                    Tile tile = anthill.getSim().getTile(x,y);
+                    tile.setPrev(null);
+                    tile.setVisited(false);
+                }
+            }
+        }
+        //choose what to do
+            //if interests distance == 1 do magic
+            //or move
+        //clean up mess
+        //move based on speed
+
         Tile myTile = anthill.getSim().getTile(x,y);
         if(myTile.getAnts().size() == 1)
         {

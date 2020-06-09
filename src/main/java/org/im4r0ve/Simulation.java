@@ -15,8 +15,8 @@ public class Simulation
     public Simulation(Tile[][] map, int initAnts, ArrayList<AntGenome> genomes, int maxFoodPerTile) //add multiple anthills/genomes
     {
         this.map = map;
-        height = map.length;
-        width = map[0].length;
+        height = map[0].length;
+        width = map.length;
         this.maxFoodPerTile = maxFoodPerTile;
         anthills = new ArrayList<>();
         anthills.add(new Anthill(20,20,1,initAnts, genomes,this));
@@ -35,7 +35,8 @@ public class Simulation
         {
             int centerX;
             int centerY;
-            double radius = Math.ceil(Math.sqrt(((float)foodSpawnAmount / maxFoodPerTile)/ Math.PI));
+            double radius = Math.sqrt(((float)foodSpawnAmount / maxFoodPerTile)/ Math.PI);
+            int offset = (int)Math.ceil(radius);
             //skips already filled positions
             do
             {
@@ -43,8 +44,8 @@ public class Simulation
                 centerY = random.nextInt(height);
             }while(getTile(centerX,centerY).getMaterial() != Material.GRASS);
 
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
+            for (int y = centerY-offset; y < centerY+offset; y++) {
+                for (int x = centerX-offset; x < centerX+offset; x++) {
                     if (inside_circle(centerX, centerY, x,y, radius) && getTile(x,y).getMaterial() == Material.GRASS)
                     {
                         foodSpawnAmount-= maxFoodPerTile;
@@ -55,19 +56,19 @@ public class Simulation
             }
         }
     }
-    public Tile getTile(int row, int col)
+    public Tile getTile(int x, int y)
     {
-        if (col < 0)
-            col += width;
-        if (col >= width)
-            col %= width;
+        if (x < 0)
+            x += width;
+        if (x >= width)
+            x %= width;
 
-        if (row < 0)
-            row += height;
-        if (row >= height)
-            row %= height;
+        if (y < 0)
+            y += height;
+        if (y >= height)
+            y %= height;
 
-        return map[row][col];
+        return map[x][y];
     }
 
     public Tile[][] step()

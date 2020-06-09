@@ -7,7 +7,7 @@ public class AntGenome
     private int health;
     private int strength;
     private int speed;
-    private double viewRange;
+    private float viewRange;
     private Color color;
 
     public AntGenome(int health, int strength, int speed, int viewRange, Color color)
@@ -34,7 +34,7 @@ public class AntGenome
         return speed;
     }
 
-    public double getViewRange()
+    public float getViewRange()
     {
         return viewRange;
     }

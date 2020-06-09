@@ -132,7 +132,7 @@ public class App extends Application {
                 step,
                 GUI_utils.createTextField("Strength: ", "5"));
 
-        Image defaultImage = new Image("file:resources/map1.png");
+        Image defaultImage = new Image("file:resources/map2.png");
         height = (int)defaultImage.getHeight();
         width = (int)defaultImage.getWidth();
         displayedMap = new Canvas(width,height);

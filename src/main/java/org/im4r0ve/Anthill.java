@@ -18,12 +18,15 @@ public class Anthill
         this.x = x;
         this.y = y;
         this.sim = sim;
-        sim.getTile(x,y).setMaterial(Material.ANTHILL);
+        Tile myTile = sim.getTile(x,y);
+        myTile.setMaterial(Material.ANTHILL);
 
         this.reproductionRate = reproductionRate;
         for(int i = 0; i< initAnts;++i)
         {
-            ants.add(new Ant(antGenomes.get(0),this));//add dynamic genome ratios
+            Ant newAnt = new Ant(antGenomes.get(0),this);
+            ants.add(newAnt);//add dynamic genome ratios
+            myTile.getAnts().add(newAnt);
         }
         food = 0;
     }
