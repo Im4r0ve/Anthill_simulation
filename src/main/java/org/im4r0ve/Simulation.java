@@ -10,23 +10,49 @@ public class Simulation
 
     private Tile[][] map;
     private ArrayList<Anthill> anthills;
+    private int maxFoodPerTile;
 
-    public Simulation(Tile[][] map, int initAnts, ArrayList<AntGenome> genomes) //add multiple anthills/genomes
+    public Simulation(Tile[][] map, int initAnts, ArrayList<AntGenome> genomes, int maxFoodPerTile) //add multiple anthills/genomes
     {
         this.map = map;
         height = map.length;
         width = map[0].length;
+        this.maxFoodPerTile = maxFoodPerTile;
         anthills = new ArrayList<>();
         anthills.add(new Anthill(20,20,1,initAnts, genomes,this));
     }
+    boolean inside_circle(int centerX, int centerY, int tileX, int tileY, double radius) {
+        double dx = centerX - tileX;
+        double dy = centerY - tileY;
+        return dx*dx + dy*dy <= radius*radius;
+    }
 
-    public void spawnFood()
+
+    public void spawnFood(int foodSpawnAmount, double probability)
     {
         Random random = new Random();
-        if(random.nextDouble() < 0.30)
+        if(random.nextDouble() <= probability)
         {
-            while(map[random.nextInt(width)][random.nextInt(height)].isBarrier()){}
+            int centerX;
+            int centerY;
+            double radius = Math.ceil(Math.sqrt(((float)foodSpawnAmount / maxFoodPerTile)/ Math.PI));
+            //skips already filled positions
+            do
+            {
+                centerX = random.nextInt(width);
+                centerY = random.nextInt(height);
+            }while(getTile(centerX,centerY).getMaterial() != Material.GRASS);
 
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (inside_circle(centerX, centerY, x,y, radius) && getTile(x,y).getMaterial() == Material.GRASS)
+                    {
+                        foodSpawnAmount-= maxFoodPerTile;
+                        getTile(x,y).addFood(maxFoodPerTile);
+                        getTile(x,y).setMaterial(Material.FOOD);
+                    }
+                }
+            }
         }
     }
     public Tile getTile(int row, int col)
@@ -46,6 +72,7 @@ public class Simulation
 
     public Tile[][] step()
     {
+        spawnFood(200,1);
         for(Anthill anthill : anthills)
         {
             anthill.step();

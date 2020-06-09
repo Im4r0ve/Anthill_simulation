@@ -1,17 +1,18 @@
 package org.im4r0ve;
 
 import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+
 
 /**
  * JavaFX App
@@ -30,25 +31,27 @@ public class App extends Application {
     private int height;
     private int width;
     private boolean showMap;
+    private int maxFoodPerTile;
     public static void main(String[] args)
     {
         launch(args);
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception
+    public void start(Stage primaryStage)
     {
         //starts menu
         simulations = new ArrayList<>();
         antGenomes = new ArrayList<>();
         showMap = true;
+        maxFoodPerTile = 50;
 
         initialize(primaryStage);
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
             antGenomes.add(new AntGenome(100,25,1,5, Color.RED));
-            simulations.add(new Simulation(copyMap(map),1,antGenomes));
+            simulations.add(new Simulation(copyMap(map),1,antGenomes,maxFoodPerTile));
         }
 
         state = States.Settings;
@@ -63,17 +66,13 @@ public class App extends Application {
         //start game with the best one
     }
 
-    public static boolean isEmpty(ImageView imageView)
+    public Tile[][] loadImage(Image image)
     {
-        return imageView.getImage().isError();
-    }
-    public Tile[][] loadMap(Image image)
-    {
-        /*if(map.getImage().isError())
+        if(image.isError())
         {
             System.out.println("Error: empty image");
             return null;
-        }*/
+        }
 
         Tile[][] newMap = new Tile[width][height];
         var reader = image.getPixelReader();
@@ -81,11 +80,12 @@ public class App extends Application {
         {
             for(int x = 0; x < width;++x)
             {
-                newMap[x][y] = new Tile(reader.getColor(x,y), 0);
+                newMap[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile);
             }
         }
         return newMap;
     }
+
     private Tile[][] copyMap(Tile[][] toCopy)
     {
         Tile[][] copy = new Tile[width][height];
@@ -96,7 +96,8 @@ public class App extends Application {
             }
         return copy;
     }
-    private void draw(Tile[][] map)
+
+    private void drawMap(Tile[][] map)
     {
         var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
         for(int y = 0; y < height;++y)
@@ -122,7 +123,7 @@ public class App extends Application {
                 Tile[][] newMap = simulation.step();
                 if (showMap)
                 {
-                    draw(newMap);
+                    drawMap(newMap);
                 }
             }
         });
@@ -131,16 +132,24 @@ public class App extends Application {
                 step,
                 GUI_utils.createTextField("Strength: ", "5"));
 
-        Image defaultImage = new Image("file:resources/map2.png");
+        Image defaultImage = new Image("file:resources/map1.png");
         height = (int)defaultImage.getHeight();
         width = (int)defaultImage.getWidth();
         displayedMap = new Canvas(width,height);
-        map = loadMap(defaultImage);
-        draw(map);
+        map = loadImage(defaultImage);
+        drawMap(map);
+
+        double minScale =  Math.min(600 / width,600 / height);
+
+        displayedMap.setScaleX(minScale);
+        displayedMap.setScaleY(minScale);
+
+        Group canvas = new Group();
+        canvas.getChildren().add(displayedMap);
 
         HBox hbox = new HBox();
         hbox.setSpacing(50);
-        hbox.getChildren().addAll(vbox,displayedMap);
-        primaryStage.setScene(new Scene (hbox, width + 400, 600));
+        hbox.getChildren().addAll(vbox,canvas);
+        primaryStage.setScene(new Scene (hbox, 600 + 400, 600));
     }
 }

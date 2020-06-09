@@ -38,9 +38,24 @@ public class Ant {
         viewRange = genome.getViewRange();
         this.anthill = anthill;
     }
+    public void searchFood()
+    {
+        /*for(int y = this.y - viewRange; y < this.y+viewRange + 1;++y)
+        {
+            for (int x = this.x; x < this.x+viewRange + 1; ++x)
+            {
+                if (Math.pow(this.y - y, 2) + Math.pow(this.x - x, 2) <= Math.pow(viewRange, 2))
+                    System.out.print("x");
+                else
+                    System.out.print("_");
+            }
+            System.out.println();
+        }*/
+    }
     public void step()
     {
         //move up
+        searchFood();
         Tile myTile = anthill.getSim().getTile(x,y);
         if(myTile.getAnts().size() == 1)
         {
@@ -55,6 +70,6 @@ public class Ant {
             x++;
         }
         System.out.println(x + " " + y);
-
+        health--;
     }
 }

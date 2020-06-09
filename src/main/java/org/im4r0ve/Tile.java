@@ -10,6 +10,9 @@ public class Tile
     private Material material;
     private int food;
     private ArrayList<Ant> ants;
+    //for BFS
+    private Tile prev;
+    private boolean visited;
 
     public Tile(Color color, int food)
     {
