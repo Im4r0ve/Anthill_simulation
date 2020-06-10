@@ -13,9 +13,13 @@ public class Tile
     //for BFS
     private Tile prev;
     private boolean visited;
+    private int x;
+    private int y;
 
-    public Tile(Color color, int food)
+    public Tile(Color color, int food, int x, int y)
     {
+        this.x = x;
+        this.y = y;
         if(color == Material.FOOD.getColor())
         {
             this.initMaterial = Material.GRASS;
@@ -57,9 +61,18 @@ public class Tile
         this.food += food;
     }
 
-    public void removeFood(int food)
+    public int removeFood(int food)
     {
+        int result;
+        if(food >= this.food)
+        {
+            result = this.food;
+            this.food = 0;
+            showInitMaterial();
+            return result;
+        }
         this.food -= food;
+        return food;
     }
 
     public boolean isBarrier()
@@ -111,5 +124,15 @@ public class Tile
     public void setVisited(boolean visited)
     {
         this.visited = visited;
+    }
+
+    public int getY()
+    {
+        return y;
+    }
+
+    public int getX()
+    {
+        return x;
     }
 }

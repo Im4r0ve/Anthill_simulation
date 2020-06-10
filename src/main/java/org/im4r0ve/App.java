@@ -80,7 +80,7 @@ public class App extends Application {
         {
             for(int x = 0; x < width;++x)
             {
-                newMap[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile);
+                newMap[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile, x, y);
             }
         }
         return newMap;
@@ -118,14 +118,17 @@ public class App extends Application {
         Button step = new Button("Step");
         step.setOnAction(e ->
         {
-            for (Simulation simulation : simulations)
-            {
-                Tile[][] newMap = simulation.step();
-                if (showMap)
+            //while(true)
+            //{
+                for (Simulation simulation : simulations)
                 {
-                    drawMap(newMap);
+                    Tile[][] newMap = simulation.step();
+                    if (showMap)
+                    {
+                        drawMap(newMap);
+                    }
                 }
-            }
+            //}
         });
         VBox vbox = new VBox();
         vbox.getChildren().addAll(

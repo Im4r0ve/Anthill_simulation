@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 public class Ant {
     public Color getColor()
@@ -26,6 +27,7 @@ public class Ant {
     private int strength;
     private int speed;
     private float viewRange;
+    private int food;
 
     private Anthill anthill;
     private boolean alive = true;
@@ -103,10 +105,8 @@ public class Ant {
         }
         return result;
     }
-    public void step()
+    private void cleanUpBFS()
     {
-        ArrayList<Integer> interests = searchArea();
-        //clean up
         int offset = (int)Math.ceil(viewRange);
         for (int y = this.y-offset-1; y < this.y+offset+1; y++) {
             for (int x = this.x-offset-1; x < this.x+offset+1; x++) {
@@ -117,26 +117,173 @@ public class Ant {
                 }
             }
         }
-        //choose what to do
-            //if interests distance == 1 do magic
-            //or move
-        //clean up mess
-        //move based on speed
+    }
+    //inside of viewrange
+    private void moveToTile(int x, int y)
+    {
+        anthill.getSim().getTile(this.x, this.y).removeAnt(this);
 
-        Tile myTile = anthill.getSim().getTile(x,y);
-        if(myTile.getAnts().size() == 1)
-        {
-            myTile.showInitMaterial();
-            myTile.removeAnt(this);
-        }
-        Tile newTile = anthill.getSim().getTile(x+1,y + 1);
-        if(!newTile.isBarrier())
+        Tile newTile = anthill.getSim().getTile(x, y);
+        if (!newTile.isBarrier())
         {
             newTile.addAnt(this);
-            y++;
-            x++;
+            this.y = y;
+            this.x = x;
         }
         System.out.println(x + " " + y);
+    }
+
+    private double[] getCompass(boolean goingBack)
+    {
+        //format:  East, North,  West, South
+        double[] compass = {0.5, 0.25, 0 , 0.25};
+        int dx,dy;
+        if(goingBack)
+        {
+            dx = anthill.getX() - this.x;
+            dy = anthill.getY() - this.y;
+        }
+        else{
+            dx = this.x - anthill.getX();
+            dy = this.y - anthill.getY();
+        }
+        double rotation = Math.atan2(dy,dx);
+        if(rotation == 0.0)
+            return compass;
+        if(rotation < 0.0)
+            rotation = 2*Math.PI + rotation;
+
+        int fullRotations = (int)((rotation)/(Math.PI/2)); //rotacie doprava
+        double passToRight = (rotation - fullRotations*(Math.PI/2))/(Math.PI/2);
+
+        if(passToRight != 0.0)
+        {
+            double[] newCompass = compass.clone();
+
+            for (int i = 0; i < 4; ++i)
+            {
+                if (i == 3)
+                    newCompass[0] += passToRight * compass[i];
+                else
+                    newCompass[i + 1] += passToRight * compass[i];
+                newCompass[i] -= passToRight * compass[i];
+            }
+            compass = newCompass;
+        }
+
+        rotateRight(compass,fullRotations);
+        return compass;
+    }
+    private void rotateRight(double[] compass,int n)
+    {
+        for(int i = 0; i < n; ++i)
+        {
+            double last = compass[compass.length-1];
+            for (int j = compass.length-1; j > 0; --j)
+            {
+                compass[j] = compass[j - 1];
+            }
+            compass[0] = last;
+        }
+    }
+    //move based on compass and pheromones around ant
+    private void move()
+    {
+        for (int i = 0; i < speed; ++i)
+        {
+            //format:  East, North,  West, South
+            int[] dHorizont = {1, 0, -1, 0};
+            int[] dVertical = {0, -1, 0, 1};
+
+            double[] pheromoneValues = new double[4];
+            double[] compass = getCompass(false);
+            double sum = 0;
+
+            for (int j = 0; j < 4; ++j)
+            {
+                int neighborX = x + dHorizont[j];
+                int neighborY = y + dVertical[j];
+                //skips rocks
+                Tile tile = anthill.getSim().getTile(neighborX, neighborY);
+                if (!tile.isBarrier())
+                {
+                    pheromoneValues[j] = anthill.getPheromone(neighborX,neighborY)*compass[j];
+                    sum += pheromoneValues[j];
+                }
+            }
+            Random random = new Random();
+            double rnd = random.nextDouble()*sum;
+
+            for (int j = 0; j < 4; ++j)
+            {
+                sum -= pheromoneValues[j];
+                if(sum <= rnd)
+                {
+                    moveToTile(x + dHorizont[j],y + dVertical[j]);
+                    anthill.addPheromone(x,y, 1);
+                    break;
+                }
+            }
+        }
+    }
+    public void step()
+    {
+        //format of the result: x,y,distance
+        if(state == States.SEARCHING)
+        {
+            ArrayList<Integer> interests = searchArea();
+            if (interests.size() != 0)
+            {
+                //look for food
+                for (int i = 0; i < interests.size(); i += 3)
+                {
+                    //decide what to do
+                    boolean found = false;
+                    Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
+                    switch (tile.getMaterial())
+                    {
+                        case FOOD:
+                            if (interests.get(i + 2) == 1)
+                            {
+                                pickUpFood(tile.removeFood(strength));
+                                state = States.GOING_HOME; //maybe add what happens when Ant can carry more
+                                break;
+                            }
+                            //move closer to food by shortest path
+                            for (int j = 0; j < interests.get(i + 2) - speed; ++j)
+                            {
+                                tile = tile.getPrev();
+                            }
+                            cleanUpBFS();
+                            moveToTile(tile.getX(), tile.getY());
+                            found = true;
+                            //leave trail of pheromones
+                            while (tile.getPrev() != null)
+                            {
+                                anthill.addPheromone(tile.getX(), tile.getY(), 100);
+                            }
+                            break;
+                        case ANTHILL:
+                            System.out.println("What is anthill doing here not implemented yet");
+                            cleanUpBFS();
+                            break;
+                        default:
+                            System.out.println("ant not yet");
+                            cleanUpBFS();
+                    }
+                    if (found)
+                        break;
+                }
+            } else
+            {
+                cleanUpBFS();
+                move();
+            }
+        }
         health--;
+    }
+    public void pickUpFood(int food)
+    {
+        this.food += food;
     }
 }
