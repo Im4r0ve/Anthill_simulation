@@ -46,9 +46,11 @@ public class Simulation
 
             for (int y = centerY-offset; y < centerY+offset; y++) {
                 for (int x = centerX-offset; x < centerX+offset; x++) {
-                    if (inside_circle(centerX, centerY, x,y, radius) && getTile(x,y).getMaterial() == Material.GRASS)
+                    if (    inside_circle(centerX, centerY, x,y, radius) &&
+                            getTile(x,y).getMaterial() == Material.GRASS &&
+                            foodSpawnAmount > 0)
                     {
-                        foodSpawnAmount-= maxFoodPerTile;
+                        foodSpawnAmount -= maxFoodPerTile;
                         getTile(x,y).addFood(maxFoodPerTile);
                         getTile(x,y).setMaterial(Material.FOOD);
                     }

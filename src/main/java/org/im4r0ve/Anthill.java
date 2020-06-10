@@ -19,7 +19,7 @@ public class Anthill
         ants = new ArrayList<>();
         pheromoneMap = new int[sim.getWidth()][sim.getHeight()];
         for (int[] row: pheromoneMap)
-            Arrays.fill(row, 1);
+            Arrays.fill(row, 1000);
         this.x = x;
         this.y = y;
         this.sim = sim;
@@ -51,7 +51,16 @@ public class Anthill
         {
             ant.step();
         }
-        //decrease pheromones
+        for(int i = 0; i < sim.getHeight(); ++i)
+        {
+            for (int j = 0; j < sim.getWidth(); ++j)
+            {
+                //System.out.print(pheromoneMap[j][i]);
+                if(pheromoneMap[j][i] > 1000)
+                    pheromoneMap[j][i]--;
+            }
+            //System.out.println();
+        }
         //spawn new ant
     }
 
