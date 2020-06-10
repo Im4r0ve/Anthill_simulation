@@ -14,4 +14,14 @@ public class GUI_utils
         TextField textField = new TextField(defaultText);
         return (new HBox(myLabel, textField));
     }
+
+    public static int wrapAroundCoordinate(int coordinate, int size)
+    {
+        if (coordinate < 0)
+            coordinate += size;
+        if (coordinate >= size)
+            coordinate %= size;
+
+        return coordinate;
+    }
 }

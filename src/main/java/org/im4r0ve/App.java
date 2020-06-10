@@ -1,6 +1,7 @@
 package org.im4r0ve;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -50,8 +51,8 @@ public class App extends Application {
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
-            antGenomes.add(new AntGenome(100,25,1,5, Color.RED));
-            simulations.add(new Simulation(copyMap(map),1,antGenomes,maxFoodPerTile));
+            antGenomes.add(new AntGenome(100,25,3,10, 50, Color.RED));
+            simulations.add(new Simulation(copyMap(map),50,antGenomes,maxFoodPerTile));
         }
 
         state = States.Settings;
@@ -118,17 +119,23 @@ public class App extends Application {
         Button step = new Button("Step");
         step.setOnAction(e ->
         {
-            //while(true)
-            //{
-                for (Simulation simulation : simulations)
+            Thread taskThread = new Thread(() ->
+            {
+                Tile[][] newMap = new Tile[width][height];
+                for (int i = 0; i < 100; i++)
                 {
-                    Tile[][] newMap = simulation.step();
-                    if (showMap)
+                    for (Simulation simulation : simulations)
                     {
-                        drawMap(newMap);
+                        newMap = simulation.step();
                     }
+                    System.out.println(i + "th simulation done");
                 }
-            //}
+
+                Tile[][] finalNewMap = newMap;
+                Platform.runLater(() -> drawMap(finalNewMap));
+                });
+            taskThread.start();
+
         });
         VBox vbox = new VBox();
         vbox.getChildren().addAll(

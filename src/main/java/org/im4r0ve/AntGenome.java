@@ -8,14 +8,16 @@ public class AntGenome
     private int strength;
     private int speed;
     private float viewRange;
+    private int weight;
     private Color color;
 
-    public AntGenome(int health, int strength, int speed, int viewRange, Color color)
+    public AntGenome(int health, int strength, int speed, int viewRange, int weight, Color color)
     {
         this.health = health;
         this.strength = strength;
         this.speed = speed;
         this.viewRange = viewRange;
+        this.weight = weight;
         this.color = color;
     }
 
@@ -42,5 +44,10 @@ public class AntGenome
     public Color getColor()
     {
         return color;
+    }
+
+    public int getWeight()
+    {
+        return weight;
     }
 }

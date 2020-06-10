@@ -19,7 +19,7 @@ public class Simulation
         width = map.length;
         this.maxFoodPerTile = maxFoodPerTile;
         anthills = new ArrayList<>();
-        anthills.add(new Anthill(20,20,1,initAnts, genomes,this));
+        anthills.add(new Anthill(20,20,0.8,initAnts, genomes,this));
     }
     boolean inside_circle(int centerX, int centerY, int tileX, int tileY, double radius) {
         double dx = centerX - tileX;
@@ -60,22 +60,15 @@ public class Simulation
     }
     public Tile getTile(int x, int y)
     {
-        if (x < 0)
-            x += width;
-        if (x >= width)
-            x %= width;
-
-        if (y < 0)
-            y += height;
-        if (y >= height)
-            y %= height;
+        x = GUI_utils.wrapAroundCoordinate(x,width);
+        y = GUI_utils.wrapAroundCoordinate(y,height);
 
         return map[x][y];
     }
 
     public Tile[][] step()
     {
-        spawnFood(200,1);
+        spawnFood(200,0.25);
         for(Anthill anthill : anthills)
         {
             anthill.step();

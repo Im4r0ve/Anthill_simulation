@@ -23,7 +23,7 @@ public class Ant {
     private int x;
     private int y;
     private int health; //half of the weight
-    //private int weight; //equals food at the end
+    private int weight; //equals food at the end
     private int strength;
     private int speed;
     private float viewRange;
@@ -42,7 +42,100 @@ public class Ant {
         strength = genome.getStrength();
         speed = genome.getSpeed();
         viewRange = genome.getViewRange();
+        weight = genome.getWeight();
         this.anthill = anthill;
+    }
+
+    public void step()
+    {
+        if(checkForDeath())
+        {
+            return;
+        }
+
+        System.out.println(state);
+        //format of the interests: x,y,distance
+        ArrayList<Integer> interests = searchArea();
+        if (interests.size() == 0)
+        {
+            //didnt find anything
+            cleanUpBFS(x,y);
+            move();
+        }
+        else
+        {
+            boolean noInterest = true;
+            for (int i = 0; i < interests.size(); i += 3)
+            {
+                //decide what to do
+                Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
+                if(tile.getAnts().size() == 0)
+                {
+                    //no interest in ants
+                    if (tile.getMaterial() == Material.FOOD && food != strength)
+                    {
+                        noInterest = false;
+                        //Ant is besides food
+                        if (interests.get(i + 2) == 1)
+                        {
+                            pickUpFood(tile.removeFood(strength));
+                            state = States.GOING_HOME; //maybe add what happens when Ant can carry more
+                            cleanUpBFS(x, y);
+                            break;
+                        }
+                        getCloser(tile,interests.get(i + 2));
+                        break;
+                    }
+
+                    if(tile.getMaterial() == Material.ANTHILL && state == States.GOING_HOME)
+                    {
+                        noInterest = false;
+                        //Ant is besides Anthill
+                        if (interests.get(i + 2) == 1)
+                        {
+                            anthill.addFood(food);
+                            food = 0;
+                            //eat
+                            state = States.SEARCHING;
+                            cleanUpBFS(x, y);
+                            break;
+                        }
+                        getCloser(tile,interests.get(i + 2));
+                        break;
+                    }
+                }
+                //add what happens if detecting ant fighting etc.
+            }
+            if(noInterest)
+            {
+                cleanUpBFS(x,y);
+                move();
+            }
+        }
+        health--;
+    }
+
+    private boolean checkForDeath()
+    {
+        if(health <= 0)
+        {
+            if(food > 0)
+            {
+                health += food;
+                state = States.SEARCHING;
+                food = 0;
+            }
+            else
+            {
+                Tile myTile = anthill.getSim().getTile(x, y);
+                myTile.setMaterial(Material.FOOD);
+                myTile.addFood(weight);
+                myTile.removeAnt(this);
+                anthill.removeAnt(this);
+                return true;
+            }
+        }
+        return false;
     }
 
     private ArrayList<Integer> searchArea()
@@ -104,6 +197,7 @@ public class Ant {
         }
         return result;
     }
+
     private void cleanUpBFS(int x,int y)
     {
         int offset = (int)Math.ceil(viewRange)+1;
@@ -135,7 +229,7 @@ public class Ant {
     private double[] getCompass()
     {
         //format:  East, North,  West, South
-        double[] compass = {0.50, 0.25, 0.00, 0.25};
+        double[] compass = {0.60, 0.20, 0.00, 0.20};
         int dx,dy;
         if(state == States.GOING_HOME)
         {
@@ -225,11 +319,18 @@ public class Ant {
                 if(sum <= rnd)
                 {
                     moveToTile(x + dHorizont[j],y + dVertical[j]);
-                    anthill.addPheromone(x,y, 100);
+                    spreadPheromone(x,y);
                     break;
                 }
             }
         }
+    }
+    private void spreadPheromone(int x, int y)
+    {
+        if(food > 0)
+            anthill.addPheromone(x,y,200);
+        else
+            anthill.addPheromone(x,y,100);
     }
     public void getCloser(Tile target, int distance)
     {
@@ -245,75 +346,12 @@ public class Ant {
         //leave trail of pheromones
         while (target.getPrev() != null)
         {
-            anthill.addPheromone(target.getX(), target.getY(), 100);
+            spreadPheromone(target.getX(), target.getY());
             target = target.getPrev();
         }
         cleanUpBFS(oldX, oldY);
     }
-    public void step()
-    {
-        System.out.println(state);
-        //format of the result: x,y,distance
-        ArrayList<Integer> interests = searchArea();
-        //didnt find anything
-        if (interests.size() == 0)
-        {
-            cleanUpBFS(x,y);
-            move();
-        }
-        else
-        {
-            //look for food
-            boolean noInterest = true;
-            for (int i = 0; i < interests.size(); i += 3)
-            {
-                //decide what to do
-                Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
-                if(tile.getAnts().size() == 0)
-                {
-                    if (tile.getMaterial() == Material.FOOD && food != strength)
-                    {
-                        noInterest = false;
-                        //Ant is besides food
-                        if (interests.get(i + 2) == 1)
-                        {
-                            pickUpFood(tile.removeFood(strength));
-                            state = States.GOING_HOME; //maybe add what happens when Ant can carry more
-                            cleanUpBFS(x, y);
-                            break;
-                        }
-                        getCloser(tile,interests.get(i + 2));
-                        break;
-                    }
 
-                    if(tile.getMaterial() == Material.ANTHILL && state == States.GOING_HOME)
-                    {
-                        noInterest = false;
-                        //Ant is besides Anthill
-                        if (interests.get(i + 2) == 1)
-                        {
-                            anthill.addFood(food);
-                            food = 0;
-                            //eat
-                            state = States.SEARCHING;
-                            cleanUpBFS(x, y);
-                            break;
-                        }
-                        getCloser(tile,interests.get(i + 2));
-                        break;
-                    }
-                }
-                //add what happens if detecting ant
-            }
-            if(noInterest)
-            {
-                cleanUpBFS(x,y);
-                move();
-            }
-
-        }
-        health--;
-    }
     public void pickUpFood(int food)
     {
         this.food += food;
