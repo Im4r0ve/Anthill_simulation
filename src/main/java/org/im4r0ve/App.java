@@ -14,7 +14,6 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
-
 /**
  * JavaFX App
  */
@@ -33,6 +32,7 @@ public class App extends Application {
     private int width;
     private boolean showMap;
     private int maxFoodPerTile;
+
     public static void main(String[] args)
     {
         launch(args);

@@ -24,4 +24,10 @@ public class GUI_utils
 
         return coordinate;
     }
+
+    public static boolean inside_circle(int centerX, int centerY, int tileX, int tileY, double radius) {
+        double dx = centerX - tileX;
+        double dy = centerY - tileY;
+        return dx*dx + dy*dy <= radius*radius;
+    }
 }

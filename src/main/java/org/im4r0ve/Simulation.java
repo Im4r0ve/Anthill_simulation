@@ -21,14 +21,18 @@ public class Simulation
         anthills = new ArrayList<>();
         anthills.add(new Anthill(20,20,0.8,initAnts, genomes,this));
     }
-    boolean inside_circle(int centerX, int centerY, int tileX, int tileY, double radius) {
-        double dx = centerX - tileX;
-        double dy = centerY - tileY;
-        return dx*dx + dy*dy <= radius*radius;
+
+    public Tile[][] step()
+    {
+        spawnFood(200,0.40);
+        for(Anthill anthill : anthills)
+        {
+            anthill.step();
+        }
+        return map;
     }
 
-
-    public void spawnFood(int foodSpawnAmount, double probability)
+    private void spawnFood(int foodSpawnAmount, double probability)
     {
         Random random = new Random();
         if(random.nextDouble() <= probability)
@@ -46,7 +50,7 @@ public class Simulation
 
             for (int y = centerY-offset; y < centerY+offset; y++) {
                 for (int x = centerX-offset; x < centerX+offset; x++) {
-                    if (    inside_circle(centerX, centerY, x,y, radius) &&
+                    if (    GUI_utils.inside_circle(centerX, centerY, x,y, radius) &&
                             getTile(x,y).getMaterial() == Material.GRASS &&
                             foodSpawnAmount > 0)
                     {
@@ -58,22 +62,13 @@ public class Simulation
             }
         }
     }
+
     public Tile getTile(int x, int y)
     {
         x = GUI_utils.wrapAroundCoordinate(x,width);
         y = GUI_utils.wrapAroundCoordinate(y,height);
 
         return map[x][y];
-    }
-
-    public Tile[][] step()
-    {
-        spawnFood(200,0.25);
-        for(Anthill anthill : anthills)
-        {
-            anthill.step();
-        }
-        return map;
     }
 
     public int getHeight()

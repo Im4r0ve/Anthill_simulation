@@ -21,7 +21,7 @@ public class Anthill
         ants = new ArrayList<>();
         pheromoneMap = new int[sim.getWidth()][sim.getHeight()];
         for (int[] row: pheromoneMap)
-            Arrays.fill(row, 1000);
+            Arrays.fill(row, 10000);
         this.x = x;
         this.y = y;
         this.sim = sim;
@@ -40,18 +40,6 @@ public class Anthill
         food = 0;
     }
 
-    public void spawnAnt()
-    {
-        if (food >= antGenomes.get(0).getHealth())
-        {
-            ants.add(new Ant(antGenomes.get(0),this));
-            food -= antGenomes.get(0).getHealth();
-        }
-    }
-    public void removeAnt(Ant ant)
-    {
-        ants.remove(ant);
-    }
     public void step()
     {
         for(int i = 0; i < ants.size(); i++)
@@ -59,11 +47,62 @@ public class Anthill
             ants.get(i).step();
         }
 
-        removePheromone(1000);
+        removePheromone(10000);
 
         Random rnd = new Random();
         if (rnd.nextDouble() <= reproductionRate)
             spawnAnt();
+    }
+
+    private void spawnAnt()
+    {
+        if (food >= antGenomes.get(0).getHealth())
+        {
+            ants.add(new Ant(antGenomes.get(0),this));
+            food -= antGenomes.get(0).getHealth();
+        }
+    }
+
+    public void removeAnt(Ant ant)
+    {
+        ants.remove(ant);
+    }
+
+
+    public int getPheromone(int x, int y)
+    {
+        int width = sim.getWidth();
+        int height = sim.getHeight();
+
+        x = GUI_utils.wrapAroundCoordinate(x,width);
+        y = GUI_utils.wrapAroundCoordinate(y,height);
+
+        return pheromoneMap[x][y];
+    }
+
+    public void addPheromone(int x, int y, int value)
+    {
+        int width = sim.getWidth();
+        int height = sim.getHeight();
+
+        x = GUI_utils.wrapAroundCoordinate(x,width);
+        y = GUI_utils.wrapAroundCoordinate(y,height);
+        if(pheromoneMap[x][y] < 2000)
+            pheromoneMap[x][y] += value;
+    }
+
+    public void removePheromone(int minValue)
+    {
+        for(int i = 0; i < sim.getHeight(); ++i)
+        {
+            for (int j = 0; j < sim.getWidth(); ++j)
+            {
+                //System.out.print(pheromoneMap[j][i]);
+                if(pheromoneMap[j][i] > minValue)
+                    pheromoneMap[j][i]--;
+            }
+            //System.out.println();
+        }
     }
 
     public int getFood()
@@ -100,41 +139,5 @@ public class Anthill
     public Simulation getSim()
     {
         return sim;
-    }
-
-    public int getPheromone(int x, int y)
-    {
-        int width = sim.getWidth();
-        int height = sim.getHeight();
-
-        x = GUI_utils.wrapAroundCoordinate(x,width);
-        y = GUI_utils.wrapAroundCoordinate(y,height);
-
-        return pheromoneMap[x][y];
-    }
-
-    public void addPheromone(int x, int y, int value)
-    {
-        int width = sim.getWidth();
-        int height = sim.getHeight();
-
-        x = GUI_utils.wrapAroundCoordinate(x,width);
-        y = GUI_utils.wrapAroundCoordinate(y,height);
-
-        pheromoneMap[x][y] += value;
-    }
-
-    public void removePheromone(int minValue)
-    {
-        for(int i = 0; i < sim.getHeight(); ++i)
-        {
-            for (int j = 0; j < sim.getWidth(); ++j)
-            {
-                //System.out.print(pheromoneMap[j][i]);
-                if(pheromoneMap[j][i] > minValue)
-                    pheromoneMap[j][i]--;
-            }
-            //System.out.println();
-        }
     }
 }

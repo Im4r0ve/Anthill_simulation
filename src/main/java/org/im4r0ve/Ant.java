@@ -8,11 +8,6 @@ import java.util.Queue;
 import java.util.Random;
 
 public class Ant {
-    public Color getColor()
-    {
-        return color;
-    }
-
     enum States{
         SEARCHING,
         GOING_HOME,
@@ -325,6 +320,7 @@ public class Ant {
             }
         }
     }
+
     private void spreadPheromone(int x, int y)
     {
         if(food > 0)
@@ -332,7 +328,8 @@ public class Ant {
         else
             anthill.addPheromone(x,y,100);
     }
-    public void getCloser(Tile target, int distance)
+
+    private void getCloser(Tile target, int distance)
     {
         //move closer to food or anthill by shortest path
         for (int j = 0; j < distance - speed; ++j)
@@ -352,8 +349,14 @@ public class Ant {
         cleanUpBFS(oldX, oldY);
     }
 
-    public void pickUpFood(int food)
+    private void pickUpFood(int food)
     {
         this.food += food;
     }
+
+    public Color getColor()
+    {
+        return color;
+    }
+
 }
