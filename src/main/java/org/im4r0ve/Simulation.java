@@ -24,6 +24,7 @@ public class Simulation
 
     public Tile[][] step()
     {
+        System.out.println("Step_____________________________________________________________________________________");
         spawnFood(250,0.05);
         for(Anthill anthill : anthills)
         {
@@ -50,7 +51,7 @@ public class Simulation
 
             for (int y = centerY-offset; y < centerY+offset; y++) {
                 for (int x = centerX-offset; x < centerX+offset; x++) {
-                    if (    GUI_utils.inside_circle(centerX, centerY, x,y, radius) &&
+                    if (    Utils.inside_circle(centerX, centerY, x,y, radius) &&
                             getTile(x,y).getMaterial() == Material.GRASS &&
                             foodSpawnAmount > 0)
                     {
@@ -65,8 +66,8 @@ public class Simulation
 
     public Tile getTile(int x, int y)
     {
-        x = GUI_utils.wrapAroundCoordinate(x,width);
-        y = GUI_utils.wrapAroundCoordinate(y,height);
+        x = Utils.wrapAroundCoordinate(x,width);
+        y = Utils.wrapAroundCoordinate(y,height);
 
         return map[x][y];
     }

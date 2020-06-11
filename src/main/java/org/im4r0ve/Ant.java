@@ -8,12 +8,14 @@ import java.util.Queue;
 import java.util.Random;
 
 public class Ant {
+    private Anthill anthill;
+    private States state;
     enum States{
         SEARCHING,
         GOING_HOME,
         FIGHTING
     }
-    private States state;
+
     private final Color color;
     private int x;
     private int y;
@@ -22,10 +24,9 @@ public class Ant {
     private int strength;
     private int speed;
     private float viewRange;
+
     private int food;
     private boolean alive;
-
-    private Anthill anthill;
 
     public Ant(AntGenome genome, Anthill anthill)
     {
@@ -48,13 +49,16 @@ public class Ant {
         {
             return;
         }
-
+        System.out.println();
         System.out.println(state);
+        System.out.println("x:"+ x + " y:" + y);
+
         //format of the interests: x,y,distance
         ArrayList<Integer> interests = searchArea();
         if (interests.size() == 0)
         {
             //didnt find anything
+            System.out.println("Didnt find anything");
             cleanUpBFS(x,y);
             move();
         }
@@ -72,13 +76,15 @@ public class Ant {
                     //Ant is besides food
                     if (interests.get(i + 2) == 1)
                     {
+                        System.out.println("Picking up food: " + tile.getFood());
+                        System.out.println(food + " "+ strength);
                         pickUpFood(tile.removeFood(strength));
+                        System.out.println(food);
                         state = States.GOING_HOME; //maybe add what happens when Ant can carry more
                         cleanUpBFS(x, y);
                         break;
                     }
-                    System.out.println("getting closer");
-                    System.out.println(tile.getX() +" "+ tile.getY());
+                    System.out.println("Getting closer: " + tile.getMaterial() + " "+ tile.getX() + " "+ tile.getY());
                     getCloser(tile, interests.get(i + 2));
                     break;
                 }
@@ -89,6 +95,7 @@ public class Ant {
                     //Ant is besides Anthill
                     if (interests.get(i + 2) == 1)
                     {
+                        System.out.println("Storing food");
                         anthill.addFood(food);
                         food = 0;
                         //eat
@@ -96,15 +103,16 @@ public class Ant {
                         cleanUpBFS(x, y);
                         break;
                     }
+                    System.out.println("Getting closer: " + tile.getMaterial() + " "+ tile.getX() + " "+ tile.getY());
                     getCloser(tile, interests.get(i + 2));
                     break;
                 }
-
                 //add what happens if detecting ant fighting etc.
             }
 
             if(nothingInteresting)
             {
+                System.out.println("Didnt find anything interesting");
                 cleanUpBFS(x,y);
                 move();
             }
@@ -202,28 +210,81 @@ public class Ant {
             for (int xs = x-offset; xs < x+offset; xs++)
             {
                 Tile tile = anthill.getSim().getTile(xs, ys);
-                //if(tile.getPrev() == null && tile.isVisited() == true)
-                  //  System.out.print(tile.getPrev() + " " + tile.isVisited() + " | ");
-
                 tile.setPrev(null);
                 tile.setVisited(false);
             }
-            //System.out.println();
         }
     }
-    //inside of viewrange
-    private void moveToTile(int x, int y)
-    {
-        anthill.getSim().getTile(this.x, this.y).removeAnt(this);
 
-        Tile newTile = anthill.getSim().getTile(x, y);
-        if (!newTile.isBarrier())
+    //move based on compass and pheromones around ant
+    private void move()
+    {
+        //format:  East, North,  West, South
+        int[] dHorizont = {1, 0, -1, 0};
+        int[] dVertical = {0, -1, 0, 1};
+
+        double[] pheromoneValues = new double[4];
+        double[] compass = getCompass();
+        double sum = 0;
+
+        for (int j = 0; j < 4; ++j)
         {
-            newTile.addAnt(this);
-            this.y = y;
-            this.x = x;
+            int neighborX = x + dHorizont[j];
+            int neighborY = y + dVertical[j];
+            //skips rocks
+            Tile tile = anthill.getSim().getTile(neighborX, neighborY);
+            if (!tile.isBarrier())
+            {
+                pheromoneValues[j] = anthill.getPheromone(neighborX,neighborY)*compass[j];
+                sum += pheromoneValues[j];
+            }
         }
-        System.out.println(x + " " + y);
+
+        Random random = new Random();
+        for (int i = 0; i < speed; ++i)
+        {
+            double tempSum = sum;
+            double rnd = random.nextDouble()*sum;
+            System.out.println("E " + pheromoneValues[0] + " N " + pheromoneValues[1] + " W " +pheromoneValues[2] + " S " +pheromoneValues[3]);
+
+            for (int j = 0; j < 4; ++j)
+            {
+                tempSum -= pheromoneValues[j];
+                if(tempSum <= rnd)
+                {
+                    moveToTile(x + dHorizont[j],y + dVertical[j]);
+                    spreadPheromone(x,y);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void getCloser(Tile target, int distance)
+    {
+        //move closer to food or anthill by shortest path
+
+        for (int j = 0; j < Math.max(distance - speed,1); ++j)
+        {
+            target = target.getPrev();
+        }
+        //should not happen
+        if(target == null)
+        {
+            System.err.println("target je null______________________________________________________________________");
+        }
+
+        int oldX = x;
+        int oldY = y;
+        moveToTile(target.getX(), target.getY());
+
+        //leave trail of pheromones
+        while (target != null)
+        {
+            spreadPheromone(target.getX(), target.getY());
+            target = target.getPrev();
+        }
+        cleanUpBFS(oldX, oldY);
     }
 
     private double[] getCompass()
@@ -242,7 +303,7 @@ public class Ant {
             dy = this.y - anthill.getY();
         }
         double rotation = Math.atan2(-dy,dx);
-        System.out.println(rotation);
+
         if(rotation == 0.0)
             return compass;
         if(rotation < 0.0)
@@ -266,67 +327,24 @@ public class Ant {
             compass = newCompass;
         }
 
-        rotateRight(compass,fullRotations);
+        Utils.rotateArrayRight(compass,fullRotations);
+
         System.out.println("E " + compass[0] + " N " + compass[1] + " W " +compass[2] + " S " +compass[3]);
         return compass;
     }
 
-    private void rotateRight(double[] compass,int n)
+    private void moveToTile(int x, int y)
     {
-        for(int i = 0; i < n; ++i)
+        anthill.getSim().getTile(this.x, this.y).removeAnt(this);
+
+        Tile newTile = anthill.getSim().getTile(x, y);
+        if (!newTile.isBarrier())
         {
-            double last = compass[compass.length-1];
-            for (int j = compass.length-1; j > 0; --j)
-            {
-                compass[j] = compass[j - 1];
-            }
-            compass[0] = last;
+            newTile.addAnt(this);
+            this.y = y;
+            this.x = x;
         }
-    }
-
-    //move based on compass and pheromones around ant
-    private void move()
-    {
-
-            //format:  East, North,  West, South
-            int[] dHorizont = {1, 0, -1, 0};
-            int[] dVertical = {0, -1, 0, 1};
-
-            double[] pheromoneValues = new double[4];
-            double[] compass = getCompass();
-            double sum = 0;
-
-            for (int j = 0; j < 4; ++j)
-            {
-                int neighborX = x + dHorizont[j];
-                int neighborY = y + dVertical[j];
-                //skips rocks
-                Tile tile = anthill.getSim().getTile(neighborX, neighborY);
-                if (!tile.isBarrier())
-                {
-                    pheromoneValues[j] = anthill.getPheromone(neighborX,neighborY)*compass[j];
-                    sum += pheromoneValues[j];
-                }
-            }
-
-        Random random = new Random();
-        for (int i = 0; i < speed; ++i)
-        {
-            double tempSum = sum;
-            double rnd = random.nextDouble()*sum;
-            System.out.println("E " + pheromoneValues[0] + " N " + pheromoneValues[1] + " W " +pheromoneValues[2] + " S " +pheromoneValues[3]);
-
-            for (int j = 0; j < 4; ++j)
-            {
-                tempSum -= pheromoneValues[j];
-                if(tempSum <= rnd)
-                {
-                    moveToTile(x + dHorizont[j],y + dVertical[j]);
-                    spreadPheromone(x,y);
-                    break;
-                }
-            }
-        }
+        System.out.println("x:"+ x + " y:" + y);
     }
 
     private void spreadPheromone(int x, int y)
@@ -335,41 +353,6 @@ public class Ant {
             anthill.addPheromone(x,y,100);
         else
             anthill.addPheromone(x,y,20);
-    }
-
-    private void getCloser(Tile target, int distance)
-    {
-        //move closer to food or anthill by shortest path
-        if(target == null)
-        {
-            System.err.println("target je null 1");
-        }
-        if(target.getPrev() == null)
-        {
-            System.err.println("targetprev je null");
-        }
-        System.out.println(target.getMaterial());
-        System.out.println("target: " + target.getX()+" "+ target.getY());
-
-        for (int j = 0; j < Math.max(distance - speed,1); ++j)
-        {
-            target = target.getPrev();
-        }
-        if(target == null)
-        {
-            System.err.println("target je null 2");
-        }
-        int oldX = x;
-        int oldY = y;
-        moveToTile(target.getX(), target.getY());
-
-        //leave trail of pheromones
-        while (target != null)
-        {
-            spreadPheromone(target.getX(), target.getY());
-            target = target.getPrev();
-        }
-        cleanUpBFS(oldX, oldY);
     }
 
     private void pickUpFood(int food)

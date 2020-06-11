@@ -23,21 +23,21 @@ import java.util.ArrayList;
  */
 public class App extends Application {
     enum States {
-        Settings,
-        Evolving,
-        Simulating,
+        EDITING,
+        EVOLVING,
+        SIMULATING
     }
     private States state;
-    private Canvas displayedMap;
-    private Accordion settings;
     private HBox toolbar;
+    private Accordion settings;
+    private Canvas displayedMap;
+    private Simulator simulator;
 
     private Tile[][] map;
     private ArrayList<Simulation> simulations;
     private ArrayList<AntGenome> antGenomes;
     private int height;
     private int width;
-    private boolean showMap;
     private int maxFoodPerTile;
 
     public static void main(String[] args)
@@ -48,33 +48,17 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage)
     {
-        //starts menu
-        simulations = new ArrayList<>();
-        antGenomes = new ArrayList<>();
-        showMap = true;
         maxFoodPerTile = 50;
 
-        initialize(primaryStage);
+        initMainView(primaryStage);
         primaryStage.show();
-        for (int i = 0; i < 1; ++i) //generations pool
-        {
-            antGenomes.add(new AntGenome(150,50,1,8, 50, Color.RED));
-            simulations.add(new Simulation(copyMap(map),10,antGenomes,maxFoodPerTile));
-        }
 
-        state = States.Settings;
+        initSimulation();
 
-        //thread = new Thread(this);
-        //thread.run();
-        //setup of playground
-        //waits for start button
-        //starts x simulation threads for g generations
-        //waits for all threads
-        //displays results
-        //start game with the best one
+        state = States.EDITING;
     }
 
-    private void initialize(Stage primaryStage)
+    private void initMainView(Stage primaryStage)
     {
         primaryStage.setTitle("Anthill simulator");
 
@@ -92,11 +76,135 @@ public class App extends Application {
         VBox vbox = new VBox(toolbar, hbox);
         vbox.setSpacing(5);
 
-        System.out.println(toolbar.getHeight());
         primaryStage.setScene(new Scene (vbox));
     }
 
-    public Tile[][] loadImage(Image image)
+    private void initSimulation()
+    {
+        simulations = new ArrayList<>();
+        antGenomes = new ArrayList<>();
+        for (int i = 0; i < 1; ++i) //generations pool
+        {
+            antGenomes.add(new AntGenome(150,50,3,8, 50, Color.RED));
+            simulations.add(new Simulation(clone(map),50,antGenomes,maxFoodPerTile));
+        }
+        simulator = new Simulator(simulations.get(0),this);
+    }
+
+    public void drawMap(Tile[][] map)
+    {
+        var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
+        for(int y = 0; y < height;++y)
+        {
+            for(int x = 0; x < width;++x)
+            {
+                if (map[x][y].getAnts().size() != 0)
+                    writer.setColor(x,y,map[x][y].getAnts().get(0).getColor());
+                else
+                    writer.setColor(x,y,map[x][y].getMaterial().getColor());
+            }
+        }
+    }
+
+    private HBox generateToolbar()
+    {
+        Button step = new Button("Step");
+        step.setOnAction(this::handleStep);
+
+        Button start = new Button("Start");
+        start.setOnAction(this::handleStart);
+
+        Button stop = new Button("Stop");
+        stop.setOnAction(this::handleStop);
+
+        Button reset = new Button("reset");
+        reset.setOnAction(this::handleReset);
+
+        Button apply = new Button("apply");
+        apply.setOnAction(this::handleApply);
+
+        HBox toolbar = new HBox();
+        toolbar.getChildren().addAll(start, stop, step, reset, apply);
+        toolbar.setSpacing(5);
+        return toolbar;
+    }
+
+    private Accordion generateSettings()
+    {
+        Accordion accordion = new Accordion();
+        TitledPane general = new TitledPane("General" , new Label("General"));
+        TitledPane simulation = new TitledPane("Simulation"  , new Label("Simulation"));
+        TitledPane ga = new TitledPane("GA", new Label("GA"));
+        TitledPane genome = new TitledPane("Genome", Utils.createTextField("Strength","42"));
+
+        accordion.getPanes().addAll(general, simulation,ga,genome);
+        return accordion;
+    }
+
+    //__________________________________________________________________________________________________________________
+    //                                              HANDLERS
+    //__________________________________________________________________________________________________________________
+
+    private void handleStep(ActionEvent actionEvent)
+    {
+        setApplicationState(States.SIMULATING);
+        Thread taskThread = new Thread(() ->
+        {
+            Tile[][] newMap = new Tile[width][height];
+            for (Simulation simulation : simulations)
+            {
+                newMap = simulation.step();
+            }
+
+            Tile[][] finalNewMap = newMap;
+            Platform.runLater(() -> drawMap(finalNewMap));
+        });
+        taskThread.start();
+    }
+
+    private void handleStart(ActionEvent actionEvent)
+    {
+        setApplicationState(States.SIMULATING);
+        simulator.start();
+    }
+    private void handleStop(ActionEvent actionEvent)
+    {
+        simulator.stop();
+    }
+    private void handleReset(ActionEvent actionEvent)
+    {
+        setApplicationState(States.EDITING);
+        initSimulation();
+        drawMap(map);
+    }
+
+    private void handleApply(ActionEvent actionEvent)
+    {
+        TitledPane anthill = new TitledPane("Anthill", Utils.createTextField("Strength","42"));
+
+        settings.getPanes().addAll(anthill);
+    }
+
+    //__________________________________________________________________________________________________________________
+    //                                              UTILS
+    //__________________________________________________________________________________________________________________
+
+    private void processImage()
+    {
+        Image defaultImage = new Image("file:resources/map2.png");
+        height = (int)defaultImage.getHeight();
+        width = (int)defaultImage.getWidth();
+
+        displayedMap = new Canvas(width,height);
+        double minScale =  Math.min(600 / width,600 / height);
+        displayedMap.setScaleX(minScale);
+        displayedMap.setScaleY(minScale);
+
+        map = loadImage(defaultImage);
+        drawMap(map);
+    }
+
+    private Tile[][] loadImage(Image image)
     {
         if(image.isError())
         {
@@ -116,103 +224,23 @@ public class App extends Application {
         return newMap;
     }
 
-    private Tile[][] copyMap(Tile[][] toCopy)
+    private Tile[][] clone(Tile[][] toCopy)
     {
         Tile[][] copy = new Tile[width][height];
         for(int y=0; y<height; ++y)
             for(int x=0; x<width; ++x)
             {
-                copy[x][y] = toCopy[x][y];
+                copy[x][y] = new Tile(toCopy[x][y]);
             }
         return copy;
     }
 
-    private void drawMap(Tile[][] map)
+    private void setApplicationState(States state)
     {
-        var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
-        for(int y = 0; y < height;++y)
+        if (state == this.state)
         {
-            for(int x = 0; x < width;++x)
-            {
-                if (map[x][y].getAnts().size() != 0)
-                    writer.setColor(x,y,map[x][y].getAnts().get(0).getColor());
-                else
-                    writer.setColor(x,y,map[x][y].getMaterial().getColor());
-            }
+            return;
         }
-    }
-
-    private void handleStep(ActionEvent actionEvent)
-    {
-        Thread taskThread = new Thread(() ->
-        {
-            Tile[][] newMap = new Tile[width][height];
-            for (Simulation simulation : simulations)
-            {
-                newMap = simulation.step();
-            }
-
-            Tile[][] finalNewMap = newMap;
-            Platform.runLater(() -> drawMap(finalNewMap));
-        });
-        taskThread.start();
-    }
-
-    private void handleStart(ActionEvent actionEvent)
-    {
-        Thread taskThread = new Thread(() ->
-        {
-            Tile[][] newMap = new Tile[width][height];
-            for(int i = 0;; ++i)
-            {
-                for (Simulation simulation : simulations)
-                {
-                    newMap = simulation.step();
-                }
-                System.out.println(i + "th simulation done");
-                Tile[][] finalNewMap = newMap;
-                Platform.runLater(() -> drawMap(finalNewMap));
-            }
-        });
-        taskThread.start();
-    }
-    private HBox generateToolbar()
-    {
-        Button step = new Button("Step");
-        step.setOnAction(this::handleStep);
-
-        Button start = new Button("Start");
-        start.setOnAction(this::handleStart);
-
-        HBox toolbar = new HBox();
-        toolbar.getChildren().addAll(start, step);
-        toolbar.setSpacing(5);
-        return toolbar;
-    }
-    private Accordion generateSettings()
-    {
-        Accordion accordion = new Accordion();
-        TitledPane general = new TitledPane("General" , new Label("General"));
-        TitledPane simulation = new TitledPane("Simulation"  , new Label("Simulation"));
-        TitledPane ga = new TitledPane("GA", new Label("GA"));
-        TitledPane genome = new TitledPane("Genome", GUI_utils.createTextField("Strength","42"));
-
-        accordion.getPanes().addAll(general, simulation,ga,genome);
-        return accordion;
-    }
-
-    private void processImage()
-    {
-        Image defaultImage = new Image("file:resources/map2.png");
-        height = (int)defaultImage.getHeight();
-        width = (int)defaultImage.getWidth();
-
-        displayedMap = new Canvas(width,height);
-        double minScale =  Math.min(600 / width,600 / height);
-        displayedMap.setScaleX(minScale);
-        displayedMap.setScaleY(minScale);
-
-        map = loadImage(defaultImage);
-        drawMap(map);
+        this.state = state;
     }
 }

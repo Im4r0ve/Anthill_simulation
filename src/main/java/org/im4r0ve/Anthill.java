@@ -6,15 +6,17 @@ import java.util.Random;
 
 public class Anthill
 {
+    private Simulation sim;
+
     private ArrayList<Ant> ants;
+    private ArrayList<AntGenome> antGenomes;
+    private double reproductionRate;
 
     private int x;
     private int y;
     private int food;
-    private double reproductionRate;
-    private Simulation sim;
+
     private int[][] pheromoneMap;
-    private ArrayList<AntGenome> antGenomes;
     private int basePheromoneLevel;
 
     public Anthill(int x,int y, double reproductionRate,int initAnts, ArrayList<AntGenome> antGenomes, Simulation sim, int basePheromoneLevel)
@@ -66,6 +68,10 @@ public class Anthill
         }
     }
 
+    //__________________________________________________________________________________________________________________
+    //                                              GETTERS/SETTERS
+    //__________________________________________________________________________________________________________________
+
     public void removeAnt(Ant ant)
     {
         ants.remove(ant);
@@ -77,8 +83,8 @@ public class Anthill
         int width = sim.getWidth();
         int height = sim.getHeight();
 
-        x = GUI_utils.wrapAroundCoordinate(x,width);
-        y = GUI_utils.wrapAroundCoordinate(y,height);
+        x = Utils.wrapAroundCoordinate(x,width);
+        y = Utils.wrapAroundCoordinate(y,height);
 
         return pheromoneMap[x][y];
     }
@@ -88,8 +94,8 @@ public class Anthill
         int width = sim.getWidth();
         int height = sim.getHeight();
 
-        x = GUI_utils.wrapAroundCoordinate(x,width);
-        y = GUI_utils.wrapAroundCoordinate(y,height);
+        x = Utils.wrapAroundCoordinate(x,width);
+        y = Utils.wrapAroundCoordinate(y,height);
         if(pheromoneMap[x][y] < 2000)
             pheromoneMap[x][y] += value;
     }
@@ -100,11 +106,9 @@ public class Anthill
         {
             for (int j = 0; j < sim.getWidth(); ++j)
             {
-                //System.out.print(pheromoneMap[j][i]);
                 if(pheromoneMap[j][i] > basePheromoneLevel)
                     pheromoneMap[j][i] -= (pheromoneMap[j][i]-basePheromoneLevel/50);
             }
-            //System.out.println();
         }
     }
 
@@ -132,11 +136,6 @@ public class Anthill
     public int getY()
     {
         return y;
-    }
-
-    public double getReproductionRate()
-    {
-        return reproductionRate;
     }
 
     public Simulation getSim()

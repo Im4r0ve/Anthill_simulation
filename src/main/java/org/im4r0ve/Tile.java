@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 public class Tile
 {
+    private int x;
+    private int y;
     private Material initMaterial;
     private Material material;
     private int food;
@@ -13,25 +15,43 @@ public class Tile
     //for BFS
     private Tile prev;
     private boolean visited;
-    private int x;
-    private int y;
 
     public Tile(Color color, int food, int x, int y)
     {
         this.x = x;
         this.y = y;
-        if(color == Material.FOOD.getColor())
+        if(Material.FOOD.getColor().equals(color))
         {
             this.initMaterial = Material.GRASS;
+            this.material = getMaterial(color);
         }
         else
         {
             this.initMaterial = getMaterial(color);
+            this.material = initMaterial;
         }
-        this.material = initMaterial;
+
         this.food = food;
-        ants = new ArrayList<>();
+        this.ants = new ArrayList<>();
+        this.prev = null;
+        this.visited = false;
     }
+
+    public Tile(Tile other)
+    {
+        this.x = other.x;
+        this.y = other.y;
+        this.initMaterial = other.initMaterial;
+        this.material = other.material;
+        this.food = other.food;
+        this.ants = new ArrayList<>();
+        this.prev = null;
+        this.visited = false;
+    }
+
+    //__________________________________________________________________________________________________________________
+    //                                              GETTERS/SETTERS
+    //__________________________________________________________________________________________________________________
 
     public Material getMaterial(Color color)
     {
@@ -64,7 +84,7 @@ public class Tile
     public int removeFood(int food)
     {
         int result;
-        if(food >= this.food)
+        if(food > this.food)
         {
             result = this.food;
             this.food = 0;

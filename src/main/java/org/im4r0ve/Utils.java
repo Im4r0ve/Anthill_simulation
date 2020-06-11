@@ -5,7 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 
-public class GUI_utils
+public class Utils
 {
     public static HBox createTextField(String label, String defaultText)
     {
@@ -29,5 +29,18 @@ public class GUI_utils
         double dx = centerX - tileX;
         double dy = centerY - tileY;
         return dx*dx + dy*dy <= radius*radius;
+    }
+
+    public static void rotateArrayRight(double[] compass, int n)
+    {
+        for(int i = 0; i < n; ++i)
+        {
+            double last = compass[compass.length-1];
+            for (int j = compass.length-1; j > 0; --j)
+            {
+                compass[j] = compass[j - 1];
+            }
+            compass[0] = last;
+        }
     }
 }
