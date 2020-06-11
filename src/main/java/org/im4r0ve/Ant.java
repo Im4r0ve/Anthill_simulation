@@ -23,11 +23,13 @@ public class Ant {
     private int speed;
     private float viewRange;
     private int food;
+    private boolean alive;
 
     private Anthill anthill;
 
     public Ant(AntGenome genome, Anthill anthill)
     {
+        alive = true;
         state = States.SEARCHING;
         x = anthill.getX();
         y = anthill.getY();
@@ -126,7 +128,7 @@ public class Ant {
                 myTile.setMaterial(Material.FOOD);
                 myTile.addFood(weight);
                 myTile.removeAnt(this);
-                anthill.removeAnt(this);
+                alive = false;
                 return true;
             }
         }
@@ -195,15 +197,18 @@ public class Ant {
 
     private void cleanUpBFS(int x,int y)
     {
-        int offset = (int)Math.ceil(viewRange)+1;
+        int offset = (int)Math.ceil(viewRange)+3;
         for (int ys = y-offset; ys < y+offset; ys++) {
-            for (int xs = x-offset; xs < x+offset; xs++) {
-                {
-                    Tile tile = anthill.getSim().getTile(xs,ys);
-                    tile.setPrev(null);
-                    tile.setVisited(false);
-                }
+            for (int xs = x-offset; xs < x+offset; xs++)
+            {
+                Tile tile = anthill.getSim().getTile(xs, ys);
+                //if(tile.getPrev() == null && tile.isVisited() == true)
+                  //  System.out.print(tile.getPrev() + " " + tile.isVisited() + " | ");
+
+                tile.setPrev(null);
+                tile.setVisited(false);
             }
+            //System.out.println();
         }
     }
     //inside of viewrange
@@ -377,4 +382,8 @@ public class Ant {
         return color;
     }
 
+    public boolean isDead()
+    {
+        return !alive;
+    }
 }

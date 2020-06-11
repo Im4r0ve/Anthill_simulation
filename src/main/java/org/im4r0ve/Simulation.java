@@ -24,7 +24,7 @@ public class Simulation
 
     public Tile[][] step()
     {
-        spawnFood(200,0.40);
+        spawnFood(250,0.05);
         for(Anthill anthill : anthills)
         {
             anthill.step();

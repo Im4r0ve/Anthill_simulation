@@ -44,6 +44,7 @@ public class Anthill
 
     public void step()
     {
+        ants.removeIf(Ant::isDead);
         for (Ant ant : ants)
         {
             ant.step();

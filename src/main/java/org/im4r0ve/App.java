@@ -58,7 +58,7 @@ public class App extends Application {
         primaryStage.show();
         for (int i = 0; i < 1; ++i) //generations pool
         {
-            antGenomes.add(new AntGenome(100,25,3,10, 50, Color.RED));
+            antGenomes.add(new AntGenome(150,50,1,8, 50, Color.RED));
             simulations.add(new Simulation(copyMap(map),10,antGenomes,maxFoodPerTile));
         }
 
