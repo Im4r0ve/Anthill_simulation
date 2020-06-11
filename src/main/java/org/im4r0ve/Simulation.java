@@ -1,5 +1,7 @@
 package org.im4r0ve;
 
+import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -9,34 +11,37 @@ public class Simulation
     private int width;
 
     private Tile[][] map;
-    private ArrayList<Anthill> anthills;
-    private int maxFoodPerTile;
+    private Anthill anthill;
 
-    public Simulation(Tile[][] map, int initAnts, ArrayList<AntGenome> genomes, int maxFoodPerTile) //add multiple anthills/genomes
+    private int maxFoodPerTile;
+    private int foodSpawnAmount;
+    private double foodSpawnProbability;
+
+    public Simulation(Tile[][] map, int maxFoodPerTile, int foodSpawnAmount, double foodSpawnProbability,
+                      int x, int y, ArrayList<AntGenome> antGenomes, int initAnts, double reproductionRate, int basePheromoneLevel, Color antColor)
     {
         this.map = map;
         height = map[0].length;
         width = map.length;
         this.maxFoodPerTile = maxFoodPerTile;
-        anthills = new ArrayList<>();
-        anthills.add(new Anthill(20,20,0.6,initAnts, genomes,this, 1000));
+        this.foodSpawnAmount = foodSpawnAmount;
+        this.foodSpawnProbability = foodSpawnProbability;
+        this.anthill = new Anthill(x, y,this, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor);
     }
 
     public Tile[][] step()
     {
         System.out.println("Step_____________________________________________________________________________________");
-        spawnFood(250,0.05);
-        for(Anthill anthill : anthills)
-        {
-            anthill.step();
-        }
+        spawnFood();
+        anthill.step();
+
         return map;
     }
 
-    private void spawnFood(int foodSpawnAmount, double probability)
+    private void spawnFood()
     {
         Random random = new Random();
-        if(random.nextDouble() <= probability)
+        if(random.nextDouble() <= foodSpawnProbability)
         {
             int centerX;
             int centerY;

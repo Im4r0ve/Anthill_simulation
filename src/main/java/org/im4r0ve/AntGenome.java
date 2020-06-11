@@ -1,7 +1,5 @@
 package org.im4r0ve;
 
-import javafx.scene.paint.Color;
-
 public class AntGenome
 {
     private int health;
@@ -9,16 +7,15 @@ public class AntGenome
     private int speed;
     private float viewRange;
     private int weight;
-    private Color color;
 
-    public AntGenome(int health, int strength, int speed, int viewRange, int weight, Color color)
+    public AntGenome(){}
+    public AntGenome(int health, int weight,  int speed,int strength, float viewRange)
     {
         this.health = health;
         this.strength = strength;
         this.speed = speed;
         this.viewRange = viewRange;
         this.weight = weight;
-        this.color = color;
     }
 
     public int getHealth()
@@ -39,11 +36,6 @@ public class AntGenome
     public float getViewRange()
     {
         return viewRange;
-    }
-
-    public Color getColor()
-    {
-        return color;
     }
 
     public int getWeight()

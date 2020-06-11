@@ -34,7 +34,7 @@ public class Ant {
         state = States.SEARCHING;
         x = anthill.getX();
         y = anthill.getY();
-        color = genome.getColor();
+        color = anthill.getAntColor();
         health = genome.getHealth();
         strength = genome.getStrength();
         speed = genome.getSpeed();

@@ -12,9 +12,9 @@ public class Simulator
     private Simulation simulation;
     private Timeline timeline;
 
-    public Simulator(Simulation simulation, App app)
+    public Simulator(Simulation simulation, App app, int millisPerFrame)
     {
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(200), this::step));
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(millisPerFrame), this::step));
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.simulation = simulation;
         this.app = app;
