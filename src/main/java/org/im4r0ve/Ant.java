@@ -25,7 +25,6 @@ public class Ant {
     private int food;
 
     private Anthill anthill;
-    private boolean alive = true;
 
     public Ant(AntGenome genome, Anthill anthill)
     {
@@ -59,49 +58,50 @@ public class Ant {
         }
         else
         {
-            boolean noInterest = true;
+            boolean nothingInteresting = true;
             for (int i = 0; i < interests.size(); i += 3)
             {
                 //decide what to do
                 Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
-                if(tile.getAnts().size() == 0)
+                //no interest in ants
+                if (tile.getMaterial() == Material.FOOD && food != strength)
                 {
-                    //no interest in ants
-                    if (tile.getMaterial() == Material.FOOD && food != strength)
+                    nothingInteresting = false;
+                    //Ant is besides food
+                    if (interests.get(i + 2) == 1)
                     {
-                        noInterest = false;
-                        //Ant is besides food
-                        if (interests.get(i + 2) == 1)
-                        {
-                            pickUpFood(tile.removeFood(strength));
-                            state = States.GOING_HOME; //maybe add what happens when Ant can carry more
-                            cleanUpBFS(x, y);
-                            break;
-                        }
-                        getCloser(tile,interests.get(i + 2));
+                        pickUpFood(tile.removeFood(strength));
+                        state = States.GOING_HOME; //maybe add what happens when Ant can carry more
+                        cleanUpBFS(x, y);
                         break;
                     }
-
-                    if(tile.getMaterial() == Material.ANTHILL && state == States.GOING_HOME)
-                    {
-                        noInterest = false;
-                        //Ant is besides Anthill
-                        if (interests.get(i + 2) == 1)
-                        {
-                            anthill.addFood(food);
-                            food = 0;
-                            //eat
-                            state = States.SEARCHING;
-                            cleanUpBFS(x, y);
-                            break;
-                        }
-                        getCloser(tile,interests.get(i + 2));
-                        break;
-                    }
+                    System.out.println("getting closer");
+                    System.out.println(tile.getX() +" "+ tile.getY());
+                    getCloser(tile, interests.get(i + 2));
+                    break;
                 }
+
+                if (tile.getMaterial() == Material.ANTHILL && state == States.GOING_HOME)
+                {
+                    nothingInteresting = false;
+                    //Ant is besides Anthill
+                    if (interests.get(i + 2) == 1)
+                    {
+                        anthill.addFood(food);
+                        food = 0;
+                        //eat
+                        state = States.SEARCHING;
+                        cleanUpBFS(x, y);
+                        break;
+                    }
+                    getCloser(tile, interests.get(i + 2));
+                    break;
+                }
+
                 //add what happens if detecting ant fighting etc.
             }
-            if(noInterest)
+
+            if(nothingInteresting)
             {
                 cleanUpBFS(x,y);
                 move();
@@ -282,8 +282,7 @@ public class Ant {
     //move based on compass and pheromones around ant
     private void move()
     {
-        for (int i = 0; i < speed; ++i)
-        {
+
             //format:  East, North,  West, South
             int[] dHorizont = {1, 0, -1, 0};
             int[] dVertical = {0, -1, 0, 1};
@@ -304,14 +303,18 @@ public class Ant {
                     sum += pheromoneValues[j];
                 }
             }
-            Random random = new Random();
+
+        Random random = new Random();
+        for (int i = 0; i < speed; ++i)
+        {
+            double tempSum = sum;
             double rnd = random.nextDouble()*sum;
             System.out.println("E " + pheromoneValues[0] + " N " + pheromoneValues[1] + " W " +pheromoneValues[2] + " S " +pheromoneValues[3]);
 
             for (int j = 0; j < 4; ++j)
             {
-                sum -= pheromoneValues[j];
-                if(sum <= rnd)
+                tempSum -= pheromoneValues[j];
+                if(tempSum <= rnd)
                 {
                     moveToTile(x + dHorizont[j],y + dVertical[j]);
                     spreadPheromone(x,y);
@@ -324,24 +327,39 @@ public class Ant {
     private void spreadPheromone(int x, int y)
     {
         if(food > 0)
-            anthill.addPheromone(x,y,200);
-        else
             anthill.addPheromone(x,y,100);
+        else
+            anthill.addPheromone(x,y,20);
     }
 
     private void getCloser(Tile target, int distance)
     {
         //move closer to food or anthill by shortest path
-        for (int j = 0; j < distance - speed; ++j)
+        if(target == null)
+        {
+            System.err.println("target je null 1");
+        }
+        if(target.getPrev() == null)
+        {
+            System.err.println("targetprev je null");
+        }
+        System.out.println(target.getMaterial());
+        System.out.println("target: " + target.getX()+" "+ target.getY());
+
+        for (int j = 0; j < Math.max(distance - speed,1); ++j)
         {
             target = target.getPrev();
+        }
+        if(target == null)
+        {
+            System.err.println("target je null 2");
         }
         int oldX = x;
         int oldY = y;
         moveToTile(target.getX(), target.getY());
 
         //leave trail of pheromones
-        while (target.getPrev() != null)
+        while (target != null)
         {
             spreadPheromone(target.getX(), target.getY());
             target = target.getPrev();

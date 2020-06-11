@@ -15,13 +15,15 @@ public class Anthill
     private Simulation sim;
     private int[][] pheromoneMap;
     private ArrayList<AntGenome> antGenomes;
+    private int basePheromoneLevel;
 
-    public Anthill(int x,int y, double reproductionRate,int initAnts, ArrayList<AntGenome> antGenomes, Simulation sim)
+    public Anthill(int x,int y, double reproductionRate,int initAnts, ArrayList<AntGenome> antGenomes, Simulation sim, int basePheromoneLevel)
     {
+        this.basePheromoneLevel = basePheromoneLevel;
         ants = new ArrayList<>();
         pheromoneMap = new int[sim.getWidth()][sim.getHeight()];
         for (int[] row: pheromoneMap)
-            Arrays.fill(row, 10000);
+            Arrays.fill(row, basePheromoneLevel);
         this.x = x;
         this.y = y;
         this.sim = sim;
@@ -42,12 +44,12 @@ public class Anthill
 
     public void step()
     {
-        for(int i = 0; i < ants.size(); i++)
+        for (Ant ant : ants)
         {
-            ants.get(i).step();
+            ant.step();
         }
 
-        removePheromone(10000);
+        removePheromone();
 
         Random rnd = new Random();
         if (rnd.nextDouble() <= reproductionRate)
@@ -91,15 +93,15 @@ public class Anthill
             pheromoneMap[x][y] += value;
     }
 
-    public void removePheromone(int minValue)
+    public void removePheromone()
     {
         for(int i = 0; i < sim.getHeight(); ++i)
         {
             for (int j = 0; j < sim.getWidth(); ++j)
             {
                 //System.out.print(pheromoneMap[j][i]);
-                if(pheromoneMap[j][i] > minValue)
-                    pheromoneMap[j][i]--;
+                if(pheromoneMap[j][i] > basePheromoneLevel)
+                    pheromoneMap[j][i] -= (pheromoneMap[j][i]-basePheromoneLevel/50);
             }
             //System.out.println();
         }

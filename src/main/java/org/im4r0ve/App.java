@@ -2,10 +2,14 @@ package org.im4r0ve;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -25,6 +29,9 @@ public class App extends Application {
     }
     private States state;
     private Canvas displayedMap;
+    private Accordion settings;
+    private HBox toolbar;
+
     private Tile[][] map;
     private ArrayList<Simulation> simulations;
     private ArrayList<AntGenome> antGenomes;
@@ -52,7 +59,7 @@ public class App extends Application {
         for (int i = 0; i < 1; ++i) //generations pool
         {
             antGenomes.add(new AntGenome(100,25,3,10, 50, Color.RED));
-            simulations.add(new Simulation(copyMap(map),50,antGenomes,maxFoodPerTile));
+            simulations.add(new Simulation(copyMap(map),10,antGenomes,maxFoodPerTile));
         }
 
         state = States.Settings;
@@ -65,6 +72,28 @@ public class App extends Application {
         //waits for all threads
         //displays results
         //start game with the best one
+    }
+
+    private void initialize(Stage primaryStage)
+    {
+        primaryStage.setTitle("Anthill simulator");
+
+        toolbar = generateToolbar();
+
+        settings = generateSettings();
+        VBox vboxSettings = new VBox(settings);
+
+        processImage();
+        Group canvas = new Group(displayedMap);
+
+        HBox hbox = new HBox(vboxSettings,canvas);
+        hbox.setSpacing(5);
+
+        VBox vbox = new VBox(toolbar, hbox);
+        vbox.setSpacing(5);
+
+        System.out.println(toolbar.getHeight());
+        primaryStage.setScene(new Scene (vbox));
     }
 
     public Tile[][] loadImage(Image image)
@@ -112,54 +141,78 @@ public class App extends Application {
             }
         }
     }
-    private void initialize(Stage primaryStage)
+
+    private void handleStep(ActionEvent actionEvent)
     {
-        primaryStage.setTitle("Anthill simulator");
-
-        Button step = new Button("Step");
-        step.setOnAction(e ->
+        Thread taskThread = new Thread(() ->
         {
-            Thread taskThread = new Thread(() ->
+            Tile[][] newMap = new Tile[width][height];
+            for (Simulation simulation : simulations)
             {
-                Tile[][] newMap = new Tile[width][height];
-                for (int i = 0; i < 100; i++)
-                {
-                    for (Simulation simulation : simulations)
-                    {
-                        newMap = simulation.step();
-                    }
-                    System.out.println(i + "th simulation done");
-                }
+                newMap = simulation.step();
+            }
 
+            Tile[][] finalNewMap = newMap;
+            Platform.runLater(() -> drawMap(finalNewMap));
+        });
+        taskThread.start();
+    }
+
+    private void handleStart(ActionEvent actionEvent)
+    {
+        Thread taskThread = new Thread(() ->
+        {
+            Tile[][] newMap = new Tile[width][height];
+            for(int i = 0;; ++i)
+            {
+                for (Simulation simulation : simulations)
+                {
+                    newMap = simulation.step();
+                }
+                System.out.println(i + "th simulation done");
                 Tile[][] finalNewMap = newMap;
                 Platform.runLater(() -> drawMap(finalNewMap));
-                });
-            taskThread.start();
-
+            }
         });
-        VBox vbox = new VBox();
-        vbox.getChildren().addAll(
-                step,
-                GUI_utils.createTextField("Strength: ", "5"));
+        taskThread.start();
+    }
+    private HBox generateToolbar()
+    {
+        Button step = new Button("Step");
+        step.setOnAction(this::handleStep);
 
+        Button start = new Button("Start");
+        start.setOnAction(this::handleStart);
+
+        HBox toolbar = new HBox();
+        toolbar.getChildren().addAll(start, step);
+        toolbar.setSpacing(5);
+        return toolbar;
+    }
+    private Accordion generateSettings()
+    {
+        Accordion accordion = new Accordion();
+        TitledPane general = new TitledPane("General" , new Label("General"));
+        TitledPane simulation = new TitledPane("Simulation"  , new Label("Simulation"));
+        TitledPane ga = new TitledPane("GA", new Label("GA"));
+        TitledPane genome = new TitledPane("Genome", GUI_utils.createTextField("Strength","42"));
+
+        accordion.getPanes().addAll(general, simulation,ga,genome);
+        return accordion;
+    }
+
+    private void processImage()
+    {
         Image defaultImage = new Image("file:resources/map2.png");
         height = (int)defaultImage.getHeight();
         width = (int)defaultImage.getWidth();
+
         displayedMap = new Canvas(width,height);
-        map = loadImage(defaultImage);
-        drawMap(map);
-
         double minScale =  Math.min(600 / width,600 / height);
-
         displayedMap.setScaleX(minScale);
         displayedMap.setScaleY(minScale);
 
-        Group canvas = new Group();
-        canvas.getChildren().add(displayedMap);
-
-        HBox hbox = new HBox();
-        hbox.setSpacing(50);
-        hbox.getChildren().addAll(vbox,canvas);
-        primaryStage.setScene(new Scene (hbox, 600 + 400, 600));
+        map = loadImage(defaultImage);
+        drawMap(map);
     }
 }

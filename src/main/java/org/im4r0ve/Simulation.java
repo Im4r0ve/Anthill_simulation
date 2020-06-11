@@ -19,7 +19,7 @@ public class Simulation
         width = map.length;
         this.maxFoodPerTile = maxFoodPerTile;
         anthills = new ArrayList<>();
-        anthills.add(new Anthill(20,20,0.8,initAnts, genomes,this));
+        anthills.add(new Anthill(20,20,0.6,initAnts, genomes,this, 1000));
     }
 
     public Tile[][] step()
