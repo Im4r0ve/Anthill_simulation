@@ -227,24 +227,6 @@ public class Ant {
     }
 
     /**
-     * Cleans up all the shortest paths and markings on the map after running searchArea().
-     * @param x coordinate of the start of searchArea().
-     * @param y coordinate of the start of searchArea().
-     */
-    private void cleanUpBFS(int x,int y)
-    {
-        int offset = (int)Math.ceil(viewRange)+3;
-        for (int ys = y-offset; ys < y+offset; ys++) {
-            for (int xs = x-offset; xs < x+offset; xs++)
-            {
-                Tile tile = anthill.getSim().getTile(xs, ys);
-                tile.setPrev(null);
-                tile.setVisited(false);
-            }
-        }
-    }
-
-    /**
      * Moves based on compass values multiplied by pheromone values in each direction.
      * Compass is giving better probability of going straight from the anthill.
      */
@@ -323,6 +305,24 @@ public class Ant {
             target = target.getPrev();
         }
         cleanUpBFS(oldX, oldY);
+    }
+
+    /**
+     * Cleans up all the shortest paths and markings on the map after running searchArea().
+     * @param x coordinate of the start of searchArea().
+     * @param y coordinate of the start of searchArea().
+     */
+    private void cleanUpBFS(int x,int y)
+    {
+        int offset = (int)Math.ceil(viewRange)+3;
+        for (int ys = y-offset; ys < y+offset; ys++) {
+            for (int xs = x-offset; xs < x+offset; xs++)
+            {
+                Tile tile = anthill.getSim().getTile(xs, ys);
+                tile.setPrev(null);
+                tile.setVisited(false);
+            }
+        }
     }
 
     /**

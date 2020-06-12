@@ -81,7 +81,9 @@ public class App extends Application {
         primaryStage.show();
         initialize();
     }
-
+    //__________________________________________________________________________________________________________________
+    //                                       Initialization
+    //__________________________________________________________________________________________________________________
     /**
      * Function initialize() gets values of variables from corresponding text fields and initializes
      * all of the data structures based on variables
@@ -145,7 +147,9 @@ public class App extends Application {
         }
         simulator = new Simulator(simulations.get(0),this,millisPerFrame);
     }
-
+    //__________________________________________________________________________________________________________________
+    //                                      Updates elements in the UI
+    //__________________________________________________________________________________________________________________
     /**
      * Updates all AntGenomes after pressing Apply changes
      */
@@ -208,7 +212,9 @@ public class App extends Application {
         this.stepsTaken += stepsTaken;
         this.showStepsTaken.setText("Steps taken: " + this.stepsTaken);
     }
-
+    //__________________________________________________________________________________________________________________
+    //                                       Generating UI elements
+    //__________________________________________________________________________________________________________________
     /**
      * Generates the top toolbar of the UI
      * @return Returns an object of horizontally stacked buttons
@@ -247,7 +253,7 @@ public class App extends Application {
     }
     //__________________________________________________________________________________________________________________
     //                                       Setup of default values
-    //__________________________________________________________________________________________________________________
+
     /**
      * Generates accordion style settings on the left side of the UI.
      * For now it is also responsible for setting up default values of Simulation and AntGenomes
@@ -270,7 +276,7 @@ public class App extends Application {
         addAntGenome(100,50,3,50,8,20,200);
         addAntGenome(200,100,3,200,5,20,200);
     }
-
+    //__________________________________________________________________________________________________________________
     /**
      * Adds anthill Titled Pane to the settings panel.
      */

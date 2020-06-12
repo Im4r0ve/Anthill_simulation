@@ -89,6 +89,35 @@ public class Anthill
         }
     }
 
+    /**
+     * Redraws anthill based on amount of food in it.
+     */
+    private void redrawAnthill()
+    {
+        double radius = Math.sqrt(((float)this.food / sim.getFoodPerTile())/ Math.PI);
+        int offset = 100;
+        int tempFood = this.food;
+        for (int y = this.y-offset; y < this.y+offset; y++) {
+            for (int x = this.x-offset; x < this.x+offset; x++) {
+                if (    Utils.inside_circle(this.x, this.y, x,y, radius) &&
+                        (sim.getTile(x,y).getMaterial() == Material.GRASS ||
+                                sim.getTile(x,y).getMaterial() == Material.ANTHILL) &&
+                        tempFood > 0)
+                {
+                    tempFood -= sim.getFoodPerTile();
+                    sim.getTile(x,y).setMaterial(Material.ANTHILL);
+                }
+                else
+                {
+                    if(sim.getTile(x,y).getMaterial() == Material.ANTHILL && (x != this.x || y != this.y))
+                    {
+                        sim.getTile(x,y).showInitMaterial();
+                    }
+                }
+            }
+        }
+    }
+
     //__________________________________________________________________________________________________________________
     //                                              GETTERS/SETTERS
     //__________________________________________________________________________________________________________________
@@ -152,35 +181,6 @@ public class Anthill
     public void addFood(int food)
     {
         this.food += food;
-    }
-
-    /**
-     * Redraws anthill based on amount of food in it.
-     */
-    private void redrawAnthill()
-    {
-        double radius = Math.sqrt(((float)this.food / sim.getFoodPerTile())/ Math.PI);
-        int offset = 100;
-        int tempFood = this.food;
-        for (int y = this.y-offset; y < this.y+offset; y++) {
-            for (int x = this.x-offset; x < this.x+offset; x++) {
-                if (    Utils.inside_circle(this.x, this.y, x,y, radius) &&
-                        (sim.getTile(x,y).getMaterial() == Material.GRASS ||
-                        sim.getTile(x,y).getMaterial() == Material.ANTHILL) &&
-                        tempFood > 0)
-                {
-                    tempFood -= sim.getFoodPerTile();
-                    sim.getTile(x,y).setMaterial(Material.ANTHILL);
-                }
-                else
-                {
-                    if(sim.getTile(x,y).getMaterial() == Material.ANTHILL && (x != this.x || y != this.y))
-                    {
-                        sim.getTile(x,y).showInitMaterial();
-                    }
-                }
-            }
-        }
     }
 
     /**
