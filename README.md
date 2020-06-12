@@ -1,6 +1,6 @@
 # Anthill_simulation
 
-The app can be launched using following Maven command:
+The app can be launched using the following Maven command:
 ```
 mvn run:javafx
 ```
