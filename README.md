@@ -14,7 +14,8 @@ Default values can be changed in the class App.java in the function generateSett
 
 ## Using your own map:
 If you want to use your own map or modify the default one you need to put it
-into resources folder. Then you need to update this line in the function loadImage() in App.java
+into resources folder. Then you need to update this line in the function loadImage() in App.java.
+You need to use colors that are in Material.java or you can change them there.
 ```
 defaultImage = new Image("file:resources/yourMapName.png");
 ```
