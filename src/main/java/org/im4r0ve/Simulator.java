@@ -36,19 +36,12 @@ public class Simulator
      */
     private void step(ActionEvent actionEvent)
     {
-        try
+        Thread taskThread = new Thread(() ->
         {
-            Thread taskThread = new Thread(() ->
-            {
-                Tile[][] finalNewMap = simulation.step();
-                Platform.runLater(() -> app.drawMap(finalNewMap));
-            });
-            taskThread.start();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
+            Tile[][] finalNewMap = simulation.step();
+            Platform.runLater(() -> app.drawMap(finalNewMap));
+        });
+        taskThread.start();
     }
 
     /**

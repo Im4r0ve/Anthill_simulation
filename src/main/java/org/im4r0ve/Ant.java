@@ -340,6 +340,11 @@ public class Ant {
             dx = this.x - anthill.getX();
             dy = this.y - anthill.getY();
         }
+        if(dx == 0 && dy == 0)
+        {
+            Random rnd = new Random();
+            Utils.rotateArrayRight(compass,rnd.nextInt(4));
+        }
         double rotation = Math.atan2(-dy,dx);
 
         if(rotation == 0.0)

@@ -26,7 +26,6 @@ import java.util.Map;
 public class App extends Application {
     enum States {
         EDITING,
-        EVOLVING,
         SIMULATING
     }
     private Image defaultImage;
@@ -48,7 +47,7 @@ public class App extends Application {
     private int width;
 
     //Simulation variables
-    private int maxFoodPerTile;
+    private int foodPerTile;
     private double foodSpawnProbability;
     private int foodSpawnAmount;
     private int millisPerFrame;
@@ -86,7 +85,7 @@ public class App extends Application {
      */
     private void initialize()
     {
-        maxFoodPerTile = Integer.parseInt(textFields.get("Max food on tile:").getText());
+        foodPerTile = Integer.parseInt(textFields.get("Max food on tile:").getText());
         foodSpawnAmount = Integer.parseInt(textFields.get("Food spawn amount:").getText());
         foodSpawnProbability = Double.parseDouble(textFields.get("Food spawn prob:").getText());
         x = Integer.parseInt(textFields.get("x:").getText());
@@ -138,7 +137,7 @@ public class App extends Application {
 
         for (int i = 0; i < 1; ++i) //multiple simulations will be needed for faster work with genetic algorithms
         {
-            simulations.add(new Simulation(clone(map), maxFoodPerTile, foodSpawnAmount, foodSpawnProbability,
+            simulations.add(new Simulation(clone(map), foodPerTile, foodSpawnAmount, foodSpawnProbability,
                     x, y, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor));
         }
         simulator = new Simulator(simulations.get(0),this,millisPerFrame);
@@ -317,6 +316,7 @@ public class App extends Application {
      */
     private void handleReset(ActionEvent actionEvent)
     {
+        simulator.stop();
         setApplicationState(States.EDITING);
         initSimulation();
         drawMap(map);
@@ -364,7 +364,7 @@ public class App extends Application {
         {
             for(int x = 0; x < width;++x)
             {
-                map[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile, x, y);
+                map[x][y] = new Tile(reader.getColor(x,y), foodPerTile, x, y);
             }
         }
         drawMap(map);

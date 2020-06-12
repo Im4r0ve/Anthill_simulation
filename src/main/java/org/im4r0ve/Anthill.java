@@ -73,6 +73,7 @@ public class Anthill
         Random rnd = new Random();
         if (rnd.nextDouble() <= reproductionRate)
             spawnAnt();
+        redrawAnthill();
         return ants.size();
     }
 
@@ -147,13 +148,12 @@ public class Anthill
     public void addFood(int food)
     {
         this.food += food;
-        redrawAnthill();
     }
 
     private void redrawAnthill()
     {
-        double radius = Math.sqrt(((float)this.food / sim.getMaxFoodPerTile())/ Math.PI);
-        int offset = 10;
+        double radius = Math.sqrt(((float)this.food / sim.getFoodPerTile())/ Math.PI);
+        int offset = 100;
         int tempFood = this.food;
         for (int y = this.y-offset; y < this.y+offset; y++) {
             for (int x = this.x-offset; x < this.x+offset; x++) {
@@ -162,7 +162,7 @@ public class Anthill
                         sim.getTile(x,y).getMaterial() == Material.ANTHILL) &&
                         tempFood > 0)
                 {
-                    tempFood -= sim.getMaxFoodPerTile();
+                    tempFood -= sim.getFoodPerTile();
                     sim.getTile(x,y).setMaterial(Material.ANTHILL);
                 }
                 else
@@ -185,7 +185,6 @@ public class Anthill
         }
         int result = this.food;
         this.food = 0;
-        redrawAnthill();
         return result;
     }
 

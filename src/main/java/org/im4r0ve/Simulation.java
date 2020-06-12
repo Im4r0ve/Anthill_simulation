@@ -16,19 +16,19 @@ public class Simulation
     private Tile[][] map;
     private Anthill anthill;
 
-    private int maxFoodPerTile;
+    private int foodPerTile;
     private int foodSpawnAmount;
     private double foodSpawnProbability;
 
     private static Tile rock;
-    public Simulation(Tile[][] map, int maxFoodPerTile, int foodSpawnAmount, double foodSpawnProbability,
+    public Simulation(Tile[][] map, int foodPerTile, int foodSpawnAmount, double foodSpawnProbability,
                       int x, int y, ArrayList<AntGenome> antGenomes, int initAnts, double reproductionRate, int basePheromoneLevel, Color antColor)
     {
         rock = new Tile(Material.ROCK.getColor(),0,0,0);
         this.map = map;
         height = map[0].length;
         width = map.length;
-        this.maxFoodPerTile = maxFoodPerTile;
+        this.foodPerTile = foodPerTile;
         this.foodSpawnAmount = foodSpawnAmount;
         this.foodSpawnProbability = foodSpawnProbability;
         this.anthill = new Anthill(x, y,this, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor);
@@ -58,7 +58,7 @@ public class Simulation
         {
             int centerX;
             int centerY;
-            double radius = Math.sqrt(((float)foodSpawnAmount / maxFoodPerTile)/ Math.PI);
+            double radius = Math.sqrt(((float)foodSpawnAmount / foodPerTile)/ Math.PI);
             int offset = (int)Math.ceil(radius);
             //skips already filled positions
             do
@@ -73,8 +73,8 @@ public class Simulation
                             getTile(x,y).getMaterial() == Material.GRASS &&
                             tempFoodSpawnAmount > 0)
                     {
-                        tempFoodSpawnAmount -= maxFoodPerTile;
-                        getTile(x,y).addFood(maxFoodPerTile);
+                        tempFoodSpawnAmount -= foodPerTile;
+                        getTile(x,y).addFood(foodPerTile);
                         getTile(x,y).setMaterial(Material.FOOD);
                     }
                 }
@@ -112,8 +112,11 @@ public class Simulation
         return width;
     }
 
-    public int getMaxFoodPerTile()
+    /**
+     * @return Maximum amount of food on
+     */
+    public int getFoodPerTile()
     {
-        return maxFoodPerTile;
+        return foodPerTile;
     }
 }
