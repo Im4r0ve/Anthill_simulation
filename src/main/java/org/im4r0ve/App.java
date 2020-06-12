@@ -37,6 +37,7 @@ public class App extends Application {
     private Button apply;
     private Button stop;
     private Button reset;
+    private CheckBox showPheromones;
     private Label currentPopulation;
     private Label showStepsTaken;
     private int stepsTaken;
@@ -179,7 +180,8 @@ public class App extends Application {
     public void updateSimulation(Result result)
     {
         drawMap(result.getMap());
-        drawOverlay(result.getOverlay());
+        if(this.showPheromones.isSelected())
+            drawOverlay(result.getOverlay());
         updateStatistics(result.getPopulation());
     }
 
@@ -213,8 +215,10 @@ public class App extends Application {
         {
             for(int x = 0; x < width;++x)
             {
+                if(overlay[x][y]>2000)
+                    System.out.println("WTF");
                 double translatedValue = translateRange(basePheromoneLevel,basePheromoneLevel*2,0.0,1.0, overlay[x][y]);
-                writer.setColor(x,y, Color.rgb(255,0,0, translatedValue));
+                writer.setColor(x,y, Color.rgb(255,255,0, translatedValue));
             }
         }
     }
@@ -254,6 +258,12 @@ public class App extends Application {
         this.apply = new Button("Apply changes");
         this.apply.setOnAction(this::handleApply);
 
+        this.showPheromones = new CheckBox("Show pheromones");
+        this.showPheromones.setSelected(true);
+        this.showPheromones.setMaxHeight(Double.MAX_VALUE);
+        this.showPheromones.setAlignment(Pos.CENTER);
+
+
         this.currentPopulation = new Label("Current population: 0");
         this.showStepsTaken = new Label("Steps taken: 0");
         this.stepsTaken = 0;
@@ -265,7 +275,7 @@ public class App extends Application {
         this.currentPopulation.setAlignment(Pos.CENTER);
 
         HBox toolbar = new HBox();
-        toolbar.getChildren().addAll(step, start, stop,  reset, apply, currentPopulation,showStepsTaken);
+        toolbar.getChildren().addAll(step, start, stop,  reset, apply,showPheromones, currentPopulation,showStepsTaken);
         toolbar.setSpacing(5);
         return toolbar;
     }
@@ -284,7 +294,7 @@ public class App extends Application {
         vBox.getChildren().addAll(
                 createTextField("Max food on tile:","50"),
                 createTextField("Food spawn amount:","250"),
-                createTextField("Food spawn prob:","0.7"),
+                createTextField("Food spawn prob:","0.3"),
                 createTextField("millis/frame:","200")
                 );
         vBox.setSpacing(5);

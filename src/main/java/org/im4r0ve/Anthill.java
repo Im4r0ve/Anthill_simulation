@@ -155,7 +155,7 @@ public class Anthill
 
         x = Utils.wrapAroundCoordinate(x,width);
         y = Utils.wrapAroundCoordinate(y,height);
-        if(pheromoneMap[x][y] < 2000)
+        if(pheromoneMap[x][y] + value < 2000)
             pheromoneMap[x][y] += value;
     }
 
