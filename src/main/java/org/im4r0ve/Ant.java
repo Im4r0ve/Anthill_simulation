@@ -28,6 +28,8 @@ public class Ant {
     private int strength;
     private int speed;
     private float viewRange;
+    private int pheromoneTrailFood;
+    private int pheromoneTrail;
 
     private int carryingFood;
     private boolean alive;
@@ -45,6 +47,8 @@ public class Ant {
         speed = genome.getSpeed();
         viewRange = genome.getViewRange();
         weight = genome.getWeight();
+        pheromoneTrail = genome.getPheromoneTrail();
+        pheromoneTrailFood = genome.getPheromoneTrailFood();
         this.anthill = anthill;
     }
 
@@ -305,6 +309,7 @@ public class Ant {
         if(target == null)
         {
             System.err.println("target je null______________________________________________________________________");
+            return;
         }
 
         int oldX = x;
@@ -404,9 +409,9 @@ public class Ant {
     private void spreadPheromone(int x, int y)
     {
         if(carryingFood > 0)
-            anthill.addPheromone(x,y,200);
+            anthill.addPheromone(x,y, pheromoneTrailFood);
         else
-            anthill.addPheromone(x,y,20);
+            anthill.addPheromone(x,y,pheromoneTrail);
     }
 
     /**

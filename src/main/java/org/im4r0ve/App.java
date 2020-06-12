@@ -157,8 +157,10 @@ public class App extends Application {
                     Integer.parseInt(textFields.get(i+" Weight:").getText()),
                     Integer.parseInt(textFields.get(i+" Speed:").getText()),
                     Integer.parseInt(textFields.get(i+" Strength:").getText()),
-                    Float.parseFloat(textFields.get(i+" View range:").getText())
-                    ));
+                    Float.parseFloat(textFields.get(i+" View range:").getText()),
+                    Integer.parseInt(textFields.get(i+" Pheromone trail:").getText()),
+                    Integer.parseInt(textFields.get(i+" Pheromone trail with food:").getText()))
+            );
         }
     }
 
@@ -225,11 +227,12 @@ public class App extends Application {
                 createTextField("Food spawn prob:","0.7"),
                 createTextField("millis/frame:","200")
                 );
+        vBox.setSpacing(5);
 
         settings.getPanes().addAll(simulation);
         addAnthill("#DC143C",50,50,20,0.5,1000);
-        addAntGenome(100,50,3,50,8);
-        addAntGenome(200,100,3,200,5);
+        addAntGenome(100,50,3,50,8,20,200);
+        addAntGenome(200,100,3,200,5,20,200);
     }
 
     /**
@@ -245,6 +248,7 @@ public class App extends Application {
                 createTextField("Init number of ants:",String.valueOf(initAnts)),
                 createTextField("Reproduction rate:",String.valueOf(reproductionRate)),
                 createTextField("Base pheromone level:",String.valueOf(basePheromoneLevel)));
+        vBox.setSpacing(5);
 
         TitledPane newAnthill = new TitledPane("Anthill", vBox);
         settings.getPanes().add(newAnthill);
@@ -253,7 +257,7 @@ public class App extends Application {
     /**
      * Adds AntGenome Titled Pane to the settings panel.
      */
-    private void addAntGenome(int health,int weight, int speed,int strength, float viewRange)
+    private void addAntGenome(int health,int weight, int speed,int strength, float viewRange, int pheromoneTrail,int pheromoneTrailFood)
     {
         VBox vBox = new VBox();
         vBox.getChildren().addAll(
@@ -261,11 +265,14 @@ public class App extends Application {
                 createTextField(antGenomes.size() + " Weight:",String.valueOf(weight)),
                 createTextField(antGenomes.size() + " Speed:",String.valueOf(speed)),
                 createTextField(antGenomes.size() + " Strength:",String.valueOf(strength)),
-                createTextField(antGenomes.size() + " View range:",String.valueOf(viewRange))
+                createTextField(antGenomes.size() + " View range:",String.valueOf(viewRange)),
+                createTextField(antGenomes.size() + " Pheromone trail:",String.valueOf(pheromoneTrail)),
+                createTextField(antGenomes.size() + " Pheromone trail with food:",String.valueOf(pheromoneTrailFood))
                 );
+        vBox.setSpacing(5);
 
         TitledPane newAntGenome = new TitledPane("Ant genome " + antGenomes.size(), vBox);
-        antGenomes.add(new AntGenome(health,weight,speed,strength,viewRange));
+        antGenomes.add(new AntGenome(health,weight,speed,strength,viewRange, pheromoneTrail, pheromoneTrailFood));
         settings.getPanes().add(newAntGenome);
     }
 

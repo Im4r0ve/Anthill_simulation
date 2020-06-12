@@ -10,14 +10,18 @@ public class AntGenome
     private int speed;
     private float viewRange;
     private int weight;
+    private int pheromoneTrailFood;
+    private int pheromoneTrail;
 
-    public AntGenome(int health, int weight,  int speed,int strength, float viewRange)
+    public AntGenome(int health, int weight, int speed, int strength, float viewRange, int pheromoneTrail, int pheromoneTrailFood)
     {
         this.health = health;
         this.strength = strength;
         this.speed = speed;
         this.viewRange = viewRange;
         this.weight = weight;
+        this.pheromoneTrailFood = pheromoneTrailFood;
+        this.pheromoneTrail = pheromoneTrail;
     }
 
     public int getHealth()
@@ -43,5 +47,15 @@ public class AntGenome
     public int getWeight()
     {
         return weight;
+    }
+
+    public int getPheromoneTrailFood()
+    {
+        return pheromoneTrailFood;
+    }
+
+    public int getPheromoneTrail()
+    {
+        return pheromoneTrail;
     }
 }
