@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Anthill maintains all the ants that belong to one anthill. It is also maintaining the pheromone map.
+ */
 public class Anthill
 {
     private Simulation sim;
@@ -109,7 +112,7 @@ public class Anthill
      * Adds pheromone to the map
      * @param x coordinate
      * @param y coordinate
-     * @param value
+     * @param value how much pheromone to add
      */
     public void addPheromone(int x, int y, int value)
     {

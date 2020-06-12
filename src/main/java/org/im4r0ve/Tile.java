@@ -4,6 +4,9 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
+/**
+ * Tile holds all the variables that we need to store in the map. Each pixel has corresponding Tile.
+ */
 public class Tile
 {
     private int x;

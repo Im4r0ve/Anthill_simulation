@@ -5,6 +5,9 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Responsible for maintaining the map and anthills in it.
+ */
 public class Simulation
 {
     private int height;

@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
+/**
+ * Implements all the decision making and movement of an ant. Each ant type has it's own specification.
+ */
 public class Ant {
     private Anthill anthill;
     private States state;
@@ -25,7 +28,7 @@ public class Ant {
     private int speed;
     private float viewRange;
 
-    private int food;
+    private int carryingFood;
     private boolean alive;
 
     public Ant(AntGenome genome, Anthill anthill)
@@ -43,6 +46,9 @@ public class Ant {
         this.anthill = anthill;
     }
 
+    /**
+     * Ant logic driver. Based on surroundings determines and current state determines what to do.
+     */
     public void step()
     {
         if(checkForDeath())
@@ -70,16 +76,16 @@ public class Ant {
                 //decide what to do
                 Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
                 //no interest in ants
-                if (tile.getMaterial() == Material.FOOD && food != strength)
+                if (tile.getMaterial() == Material.FOOD && carryingFood != strength)
                 {
                     nothingInteresting = false;
                     //Ant is besides food
                     if (interests.get(i + 2) == 1)
                     {
                         System.out.println("Picking up food: Available" + tile.getFood());
-                        System.out.println(food + " "+ strength);
+                        System.out.println(carryingFood + " "+ strength);
                         pickUpFood(tile.removeFood(strength));
-                        System.out.println("Food now " + food);
+                        System.out.println("Food now " + carryingFood);
                         state = States.GOING_HOME; //maybe add what happens when Ant can carry more
                         cleanUpBFS(x, y);
                         break;
@@ -96,8 +102,8 @@ public class Ant {
                     if (interests.get(i + 2) == 1)
                     {
                         System.out.println("Storing food");
-                        anthill.addFood(food);
-                        food = 0;
+                        anthill.addFood(carryingFood);
+                        carryingFood = 0;
                         //eat
                         state = States.SEARCHING;
                         cleanUpBFS(x, y);
@@ -120,15 +126,18 @@ public class Ant {
         health--;
     }
 
+    /**
+     * Checks if the ant health is less or equal 0. If ant is carrying food he eats it and searches for some more.
+     */
     private boolean checkForDeath()
     {
         if(health <= 0)
         {
-            if(food > 0)
+            if(carryingFood > 0)
             {
-                health += food;
+                health += carryingFood;
                 state = States.SEARCHING;
-                food = 0;
+                carryingFood = 0;
             }
             else
             {
@@ -143,6 +152,10 @@ public class Ant {
         return false;
     }
 
+    /**
+     * Searches the surroundings of an ant by running BFS and storing shortest paths to all interests
+     * @return ArrayList of interest points in format: x,y,distance
+     */
     private ArrayList<Integer> searchArea()
     {
         //format of the result: x,y,distance
@@ -203,6 +216,11 @@ public class Ant {
         return result;
     }
 
+    /**
+     * Cleans up all the shortest paths and markings on the map after running searchArea().
+     * @param x coordinate of the start of searchArea().
+     * @param y coordinate of the start of searchArea().
+     */
     private void cleanUpBFS(int x,int y)
     {
         int offset = (int)Math.ceil(viewRange)+3;
@@ -216,6 +234,10 @@ public class Ant {
         }
     }
 
+    /**
+     * Moves based on compass values multiplied by pheromone values in each direction.
+     * Compass is giving better probability of going straight from the anthill.
+     */
     //move based on compass and pheromones around ant
     private void move()
     {
@@ -260,6 +282,11 @@ public class Ant {
         }
     }
 
+    /**
+     * When the ant finds something interesting he gets closer to it by shortest path.
+     * @param target tile to get closer to.
+     * @param distance distance to the tile.
+     */
     private void getCloser(Tile target, int distance)
     {
         //move closer to food or anthill by shortest path
@@ -268,7 +295,7 @@ public class Ant {
         {
             target = target.getPrev();
         }
-        //should not happen
+        //for testing purposes only, did not happen
         if(target == null)
         {
             System.err.println("target je null______________________________________________________________________");
@@ -287,6 +314,11 @@ public class Ant {
         cleanUpBFS(oldX, oldY);
     }
 
+    /**
+     * Pointing away from anthill when an ants is in SEARCHING state.
+     * Points to anthill if the ant is in GOING_HOME state.
+     * @return double[] of probabilities for each direction in format: East, North,  West, South
+     */
     private double[] getCompass()
     {
         //format:  East, North,  West, South
@@ -333,6 +365,11 @@ public class Ant {
         return compass;
     }
 
+    /**
+     * Teleports an ant to the x , y position.
+     * @param x coordinate to teleport to
+     * @param y coordinate to teleport to
+     */
     private void moveToTile(int x, int y)
     {
         anthill.getSim().getTile(this.x, this.y).removeAnt(this);
@@ -347,24 +384,40 @@ public class Ant {
         System.out.println("x:"+ x + " y:" + y);
     }
 
+    /**
+     * Adds pheromone to the pheromoneMap of corresponding anthill with coordinates x,y.
+     * Adds more if an ant is carying food.
+     * @param x coordinate
+     * @param y coordinate
+     */
     private void spreadPheromone(int x, int y)
     {
-        if(food > 0)
+        if(carryingFood > 0)
             anthill.addPheromone(x,y,100);
         else
-            anthill.addPheromone(x,y,20);
+            anthill.addPheromone(x,y,30);
     }
 
+    /**
+     * @param food Food amount to pick up.
+     */
     private void pickUpFood(int food)
     {
-        this.food += food;
+        this.carryingFood += food;
     }
 
+    /**
+     * @return returns color of an ant
+     */
     public Color getColor()
     {
         return color;
     }
 
+    /**
+     * Checks if the ant health is less or equal to 0
+     * @return true if the ant is dead
+     */
     public boolean isDead()
     {
         return !alive;

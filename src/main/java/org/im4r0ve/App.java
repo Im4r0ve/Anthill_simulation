@@ -61,11 +61,17 @@ public class App extends Application {
     private double reproductionRate;
     private Color antColor;
 
+    /**
+     * Launches the app
+     */
     public static void main(String[] args)
     {
         launch(args);
     }
 
+    /**
+     * Entry method for the app. Initializes everything.
+     */
     @Override
     public void start(Stage primaryStage)
     {
@@ -160,7 +166,6 @@ public class App extends Application {
     /**
      * Draws map by iterating through 2D array of object Tile. While iterating it calculates the color
      * of each tile and displays it.
-     * @param map
      */
     public void drawMap(Tile[][] map)
     {
@@ -268,6 +273,11 @@ public class App extends Application {
     //                                              HANDLERS
     //__________________________________________________________________________________________________________________
 
+    /**
+     * Handles the press of step button in the toolbar.
+     * Updates the map by calling step on the simulation in the new thread and
+     * then the main thread shows the map when it has time.
+     */
     private void handleStep(ActionEvent actionEvent)
     {
         setApplicationState(States.SIMULATING);
@@ -285,22 +295,33 @@ public class App extends Application {
         taskThread.start();
     }
 
+    /**
+     * Handles start button. Starts the simulator.
+     */
     private void handleStart(ActionEvent actionEvent)
     {
         setApplicationState(States.SIMULATING);
         simulator.start();
     }
+    /**
+     * Handles stop button. Stops the simulator.
+     */
     private void handleStop(ActionEvent actionEvent)
     {
         simulator.stop();
     }
+    /**
+     * Resets the map to default and allows apply button to be pressed.
+     */
     private void handleReset(ActionEvent actionEvent)
     {
         setApplicationState(States.EDITING);
         initSimulation();
         drawMap(map);
     }
-
+    /**
+     * Applies all the changed settings. Only available in the EDITING state.
+     */
     private void handleApply(ActionEvent actionEvent)
     {
         initialize();

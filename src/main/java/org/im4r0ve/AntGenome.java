@@ -1,5 +1,8 @@
 package org.im4r0ve;
 
+/**
+ * Stores the whole ant genome that is needed for the creation of an ant.
+ */
 public class AntGenome
 {
     private int health;
