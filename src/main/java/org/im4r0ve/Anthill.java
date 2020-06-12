@@ -60,7 +60,7 @@ public class Anthill
      * Decreases pheromone values on the map.
      * Spawns new ants if there is enough food in the anthill
      */
-    public int step()
+    public Result step()
     {
         ants.removeIf(Ant::isDead);
         for (Ant ant : ants)
@@ -74,7 +74,7 @@ public class Anthill
         if (rnd.nextDouble() <= reproductionRate)
             spawnAnt();
         redrawAnthill();
-        return ants.size();
+        return new Result(pheromoneMap, ants.size());
     }
 
     /**

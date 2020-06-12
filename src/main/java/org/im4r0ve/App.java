@@ -32,6 +32,7 @@ public class App extends Application {
     private States state;
     private Accordion settings;
     private Canvas displayedMap;
+    private Canvas overlay;
     private Simulator simulator;
     private Button apply;
     private Button stop;
@@ -122,9 +123,9 @@ public class App extends Application {
         VBox vboxSettings = new VBox(settings);
 
         loadImage();
-        Group canvas = new Group(displayedMap);
+        Group map = new Group(displayedMap,overlay);
 
-        HBox hbox = new HBox(vboxSettings,canvas);
+        HBox hbox = new HBox(vboxSettings,map);
         hbox.setSpacing(5);
 
         VBox vbox = new VBox(toolbar, hbox);
@@ -178,7 +179,8 @@ public class App extends Application {
     public void updateSimulation(Result result)
     {
         drawMap(result.getMap());
-        updateStatistics(result.getPopulation(),result.getStepsTaken());
+        drawOverlay(result.getOverlay());
+        updateStatistics(result.getPopulation());
     }
 
     /**
@@ -199,17 +201,33 @@ public class App extends Application {
             }
         }
     }
+    private double translateRange(double oldMin,double oldMax, double newMin, double newMax, double oldValue)
+    {
+        return (((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
+    }
+
+    private void drawOverlay(int[][] overlay)
+    {
+        var writer = this.overlay.getGraphicsContext2D().getPixelWriter();
+        for(int y = 0; y < height;++y)
+        {
+            for(int x = 0; x < width;++x)
+            {
+                double translatedValue = translateRange(basePheromoneLevel,basePheromoneLevel*2,0.0,1.0, overlay[x][y]);
+                writer.setColor(x,y, Color.rgb(255,0,0, translatedValue));
+            }
+        }
+    }
 
     /**
      * Displays Current population and how many steps were taken by the ants in the simulation.
      * Labels are located int the toolbar.
      * @param population current population
-     * @param stepsTaken steps taken by current population
      */
-    private void updateStatistics( int population,int stepsTaken)
+    private void updateStatistics( int population)
     {
         currentPopulation.setText("Current population: " + population);
-        this.stepsTaken += stepsTaken;
+        this.stepsTaken += population;
         this.showStepsTaken.setText("Steps taken: " + this.stepsTaken);
     }
     //__________________________________________________________________________________________________________________
@@ -383,6 +401,10 @@ public class App extends Application {
         double minScale =  Math.min(600 / width,600 / height);
         displayedMap.setScaleX(minScale);
         displayedMap.setScaleY(minScale);
+
+        overlay = new Canvas(width,height);
+        overlay.setScaleX(minScale);
+        overlay.setScaleY(minScale);
     }
     /**
      * Processes defaultImage by reading it's colors and creating internal Tile[][] map based on material that they represent.

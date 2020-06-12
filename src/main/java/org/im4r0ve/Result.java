@@ -6,14 +6,13 @@ package org.im4r0ve;
 public class Result
 {
     private Tile[][] map;
+    private int[][] overlay;
     private int population;
-    private int stepsTaken;
 
-    public Result(Tile[][] map,int population, int stepsTaken)
+    public Result(int[][] overlay, int population)
     {
-        this.map = map;
+        this.overlay = overlay;
         this.population = population;
-        this.stepsTaken = stepsTaken;
     }
 
     public Tile[][] getMap()
@@ -21,9 +20,14 @@ public class Result
         return map;
     }
 
-    public int getStepsTaken()
+    public int[][] getOverlay()
     {
-        return stepsTaken;
+        return overlay;
+    }
+
+    public void setMap(Tile[][] map)
+    {
+        this.map = map;
     }
 
     public int getPopulation()

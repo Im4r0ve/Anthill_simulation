@@ -42,7 +42,9 @@ public class Simulation
     {
         System.out.println("Step_____________________________________________________________________________________");
         spawnFood();
-        return new Result(map,anthill.step(),anthill.step());
+        Result result = anthill.step();
+        result.setMap(map);
+        return result;
     }
 
     /**
