@@ -227,7 +227,7 @@ public class App extends Application {
                 );
 
         settings.getPanes().addAll(simulation);
-        addAnthill();
+        addAnthill("#DC143C",50,50,20,0.5,1000);
         addAntGenome(100,50,3,50,8);
         addAntGenome(200,100,3,200,5);
     }
@@ -235,19 +235,18 @@ public class App extends Application {
     /**
      * Adds anthill Titled Pane to the settings panel.
      */
-    private void addAnthill()
+    private void addAnthill(String color, int x, int y, int initAnts, double reproductionRate, int basePheromoneLevel)
     {
         VBox vBox = new VBox();
         vBox.getChildren().addAll(
-                createTextField("Ant color:","#DC143C"),
-                createTextField("x:","50"),
-                createTextField("y:","50"),
-                createTextField("Init number of ants:","20"),
-                createTextField("Reproduction rate:","0.5"),
-                createTextField("Base pheromone level:","1000"));
+                createTextField("Ant color:",color),
+                createTextField("x:",String.valueOf(x)),
+                createTextField("y:",String.valueOf(y)),
+                createTextField("Init number of ants:",String.valueOf(initAnts)),
+                createTextField("Reproduction rate:",String.valueOf(reproductionRate)),
+                createTextField("Base pheromone level:",String.valueOf(basePheromoneLevel)));
 
         TitledPane newAnthill = new TitledPane("Anthill", vBox);
-        //anthills.put("Anthill " + anthills.size(), new Anthill());
         settings.getPanes().add(newAnthill);
     }
 
