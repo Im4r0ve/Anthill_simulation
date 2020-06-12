@@ -60,7 +60,7 @@ public class Anthill
      * Decreases pheromone values on the map.
      * Spawns new ants if there is enough food in the anthill
      */
-    public void step()
+    public int step()
     {
         ants.removeIf(Ant::isDead);
         for (Ant ant : ants)
@@ -73,6 +73,7 @@ public class Anthill
         Random rnd = new Random();
         if (rnd.nextDouble() <= reproductionRate)
             spawnAnt();
+        return ants.size();
     }
 
     /**
@@ -80,10 +81,10 @@ public class Anthill
      */
     private void spawnAnt()
     {
-        if (food >= antGenomes.get(0).getHealth())
+        if (food >= antGenomes.get(0).getWeight())
         {
             ants.add(new Ant(antGenomes.get(0),this));
-            food -= antGenomes.get(0).getHealth();
+            food -= antGenomes.get(0).getWeight();
         }
     }
 
@@ -101,9 +102,12 @@ public class Anthill
     {
         int width = sim.getWidth();
         int height = sim.getHeight();
-
-        x = Utils.wrapAroundCoordinate(x,width);
-        y = Utils.wrapAroundCoordinate(y,height);
+        if(x < 0 || y < 0 || x >= width || y >= height)
+        {
+            return 0;
+        }
+        //x = Utils.wrapAroundCoordinate(x,width);
+        //y = Utils.wrapAroundCoordinate(y,height);
 
         return pheromoneMap[x][y];
     }
@@ -135,26 +139,54 @@ public class Anthill
             for (int j = 0; j < sim.getWidth(); ++j)
             {
                 if(pheromoneMap[j][i] > basePheromoneLevel)
-                    pheromoneMap[j][i] -= (pheromoneMap[j][i]-basePheromoneLevel/50);
+                    pheromoneMap[j][i] -= ((pheromoneMap[j][i]-basePheromoneLevel)/50);
             }
         }
-    }
-
-    public int getFood()
-    {
-        return food;
     }
 
     public void addFood(int food)
     {
         this.food += food;
-        //builds the anthill
+        redrawAnthill();
     }
 
-    public void removeFood(int food)
+    private void redrawAnthill()
     {
-        this.food -= food;
-        //destroys the anthill
+        double radius = Math.sqrt(((float)this.food / sim.getMaxFoodPerTile())/ Math.PI);
+        int offset = 10;
+        int tempFood = this.food;
+        for (int y = this.y-offset; y < this.y+offset; y++) {
+            for (int x = this.x-offset; x < this.x+offset; x++) {
+                if (    Utils.inside_circle(this.x, this.y, x,y, radius) &&
+                        (sim.getTile(x,y).getMaterial() == Material.GRASS ||
+                        sim.getTile(x,y).getMaterial() == Material.ANTHILL) &&
+                        tempFood > 0)
+                {
+                    tempFood -= sim.getMaxFoodPerTile();
+                    sim.getTile(x,y).setMaterial(Material.ANTHILL);
+                }
+                else
+                {
+                    if(sim.getTile(x,y).getMaterial() == Material.ANTHILL && (x != this.x || y != this.y))
+                    {
+                        sim.getTile(x,y).showInitMaterial();
+                    }
+                }
+            }
+        }
+    }
+
+    public int eatFood(int food)
+    {
+        if(food < this.food)
+        {
+            this.food -= food;
+            return food;
+        }
+        int result = this.food;
+        this.food = 0;
+        redrawAnthill();
+        return result;
     }
 
     public int getX()

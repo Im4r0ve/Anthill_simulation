@@ -20,9 +20,11 @@ public class Simulation
     private int foodSpawnAmount;
     private double foodSpawnProbability;
 
+    private static Tile rock;
     public Simulation(Tile[][] map, int maxFoodPerTile, int foodSpawnAmount, double foodSpawnProbability,
                       int x, int y, ArrayList<AntGenome> antGenomes, int initAnts, double reproductionRate, int basePheromoneLevel, Color antColor)
     {
+        rock = new Tile(Material.ROCK.getColor(),0,0,0);
         this.map = map;
         height = map[0].length;
         width = map.length;
@@ -40,7 +42,7 @@ public class Simulation
     {
         System.out.println("Step_____________________________________________________________________________________");
         spawnFood();
-        anthill.step();
+        int population = anthill.step();
 
         return map;
     }
@@ -64,14 +66,14 @@ public class Simulation
                 centerX = random.nextInt(width);
                 centerY = random.nextInt(height);
             }while(getTile(centerX,centerY).getMaterial() != Material.GRASS);
-
+            int tempFoodSpawnAmount = foodSpawnAmount;
             for (int y = centerY-offset; y < centerY+offset; y++) {
                 for (int x = centerX-offset; x < centerX+offset; x++) {
                     if (    Utils.inside_circle(centerX, centerY, x,y, radius) &&
                             getTile(x,y).getMaterial() == Material.GRASS &&
-                            foodSpawnAmount > 0)
+                            tempFoodSpawnAmount > 0)
                     {
-                        foodSpawnAmount -= maxFoodPerTile;
+                        tempFoodSpawnAmount -= maxFoodPerTile;
                         getTile(x,y).addFood(maxFoodPerTile);
                         getTile(x,y).setMaterial(Material.FOOD);
                     }
@@ -85,8 +87,12 @@ public class Simulation
      */
     public Tile getTile(int x, int y)
     {
-        x = Utils.wrapAroundCoordinate(x,width);
-        y = Utils.wrapAroundCoordinate(y,height);
+        //x = Utils.wrapAroundCoordinate(x,width);
+        //y = Utils.wrapAroundCoordinate(y,height);
+        if(x < 0 || y < 0 || x >= width || y >= height)
+        {
+           return rock;
+        }
 
         return map[x][y];
     }
@@ -104,5 +110,10 @@ public class Simulation
     public int getWidth()
     {
         return width;
+    }
+
+    public int getMaxFoodPerTile()
+    {
+        return maxFoodPerTile;
     }
 }

@@ -30,21 +30,37 @@ public class Simulator
         this.app = app;
     }
 
+    /**
+     * Does one step of the simulation
+     * @param actionEvent
+     */
     private void step(ActionEvent actionEvent)
     {
-        Thread taskThread = new Thread(() ->
+        try
         {
-            Tile[][] finalNewMap = simulation.step();
-            Platform.runLater(() -> app.drawMap(finalNewMap));
-        });
-        taskThread.start();
+            Thread taskThread = new Thread(() ->
+            {
+                Tile[][] finalNewMap = simulation.step();
+                Platform.runLater(() -> app.drawMap(finalNewMap));
+            });
+            taskThread.start();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Starts/continues the simulation
+     */
     public void start()
     {
         this.timeline.play();
     }
-
+    /**
+     * Stops the simulation
+     */
     public void stop()
     {
         this.timeline.stop();

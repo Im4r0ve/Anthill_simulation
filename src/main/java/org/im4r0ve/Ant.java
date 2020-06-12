@@ -22,6 +22,7 @@ public class Ant {
     private final Color color;
     private int x;
     private int y;
+    private int maxHealth;
     private int health; //half of the weight
     private int weight; //equals food at the end
     private int strength;
@@ -39,6 +40,7 @@ public class Ant {
         y = anthill.getY();
         color = anthill.getAntColor();
         health = genome.getHealth();
+        maxHealth = health;
         strength = genome.getStrength();
         speed = genome.getSpeed();
         viewRange = genome.getViewRange();
@@ -47,13 +49,17 @@ public class Ant {
     }
 
     /**
-     * Ant logic driver. Based on surroundings determines and current state determines what to do.
+     * Ant movement logic driver. Based on surroundings and current state determines what to do.
      */
     public void step()
     {
         if(checkForDeath())
         {
             return;
+        }
+        if(health < (Math.abs(x-anthill.getX()) + Math.abs(y - anthill.getY())))
+        {
+            state = States.GOING_HOME;
         }
         System.out.println();
         System.out.println(state);
@@ -75,13 +81,13 @@ public class Ant {
             {
                 //decide what to do
                 Tile tile = anthill.getSim().getTile(interests.get(i), interests.get(i + 1));
-                //no interest in ants
                 if (tile.getMaterial() == Material.FOOD && carryingFood != strength)
                 {
+                    //Found food and decided to get it
                     nothingInteresting = false;
-                    //Ant is besides food
                     if (interests.get(i + 2) == 1)
                     {
+                        //Ant is besides food
                         System.out.println("Picking up food: Available" + tile.getFood());
                         System.out.println(carryingFood + " "+ strength);
                         pickUpFood(tile.removeFood(strength));
@@ -97,14 +103,15 @@ public class Ant {
 
                 if (tile.getMaterial() == Material.ANTHILL && state == States.GOING_HOME)
                 {
+                    //Found anthill and decided to get to it
                     nothingInteresting = false;
-                    //Ant is besides Anthill
                     if (interests.get(i + 2) == 1)
                     {
+                        //Ant is besides Anthill
                         System.out.println("Storing food");
                         anthill.addFood(carryingFood);
                         carryingFood = 0;
-                        //eat
+                        eatFromAnthill();
                         state = States.SEARCHING;
                         cleanUpBFS(x, y);
                         break;
@@ -125,7 +132,6 @@ public class Ant {
         }
         health--;
     }
-
     /**
      * Checks if the ant health is less or equal 0. If ant is carrying food he eats it and searches for some more.
      */
@@ -393,9 +399,9 @@ public class Ant {
     private void spreadPheromone(int x, int y)
     {
         if(carryingFood > 0)
-            anthill.addPheromone(x,y,100);
+            anthill.addPheromone(x,y,200);
         else
-            anthill.addPheromone(x,y,30);
+            anthill.addPheromone(x,y,20);
     }
 
     /**
@@ -404,6 +410,15 @@ public class Ant {
     private void pickUpFood(int food)
     {
         this.carryingFood += food;
+    }
+
+    /**
+     * Eats food from anthill.
+     * Called only if it is besides anthill.
+     */
+    private void eatFromAnthill()
+    {
+        health += anthill.eatFood(maxHealth-health);
     }
 
     /**

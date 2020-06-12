@@ -8,9 +8,13 @@ public class Utils
     public static int wrapAroundCoordinate(int coordinate, int size)
     {
         if (coordinate < 0)
+        {
             coordinate += size;
+        }
         if (coordinate >= size)
+        {
             coordinate %= size;
+        }
 
         return coordinate;
     }

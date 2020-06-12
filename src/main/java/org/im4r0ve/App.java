@@ -208,7 +208,9 @@ public class App extends Application {
         toolbar.setSpacing(5);
         return toolbar;
     }
-
+    //__________________________________________________________________________________________________________________
+    //                                       Setup of default values
+    //__________________________________________________________________________________________________________________
     /**
      * Generates accordion style settings on the left side of the UI.
      * For now it is also responsible for setting up default values of Simulation and AntGenomes
@@ -219,15 +221,15 @@ public class App extends Application {
         VBox vBox = new VBox();
         TitledPane simulation = new TitledPane("Simulation"  , vBox);
         vBox.getChildren().addAll(
-                createTextField("Max food on tile:","100"),
-                createTextField("Food spawn amount:","200"),
-                createTextField("Food spawn prob:","0.3"),
+                createTextField("Max food on tile:","50"),
+                createTextField("Food spawn amount:","250"),
+                createTextField("Food spawn prob:","0.7"),
                 createTextField("millis/frame:","200")
                 );
 
         settings.getPanes().addAll(simulation);
         addAnthill();
-        addAntGenome(200,100,5,50,10);
+        addAntGenome(100,50,3,50,8);
         addAntGenome(200,100,3,200,5);
     }
 
@@ -241,7 +243,7 @@ public class App extends Application {
                 createTextField("Ant color:","#DC143C"),
                 createTextField("x:","50"),
                 createTextField("y:","50"),
-                createTextField("Init number of ants:","50"),
+                createTextField("Init number of ants:","20"),
                 createTextField("Reproduction rate:","0.5"),
                 createTextField("Base pheromone level:","1000"));
 
