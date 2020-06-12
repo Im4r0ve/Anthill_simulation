@@ -24,7 +24,7 @@ public class Simulator
      */
     public Simulator(Simulation simulation, App app, int millisPerFrame)
     {
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(millisPerFrame), this::step));
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(millisPerFrame), this::simulate));
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.simulation = simulation;
         this.app = app;
@@ -34,12 +34,21 @@ public class Simulator
      * Does one step of the simulation
      * @param actionEvent
      */
-    private void step(ActionEvent actionEvent)
+    private void simulate(ActionEvent actionEvent)
+    {
+        step();
+    }
+
+    /**
+     * Updates the map by calling step on the simulation in the new thread and
+     * then the main thread shows the map when it has time.
+     */
+    public void step()
     {
         Thread taskThread = new Thread(() ->
         {
-            Tile[][] finalNewMap = simulation.step();
-            Platform.runLater(() -> app.drawMap(finalNewMap));
+            Result result = simulation.step();
+            Platform.runLater(() -> app.updateSimulation(result));
         });
         taskThread.start();
     }

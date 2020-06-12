@@ -1,5 +1,8 @@
 package org.im4r0ve;
 
+/**
+ * A class for static utility functions.
+ */
 public class Utils
 {
     /**

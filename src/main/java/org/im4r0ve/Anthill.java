@@ -145,11 +145,18 @@ public class Anthill
         }
     }
 
+    /**
+     * Adds food to the anthill
+     * @param food food to be added to anthill.
+     */
     public void addFood(int food)
     {
         this.food += food;
     }
 
+    /**
+     * Redraws anthill based on amount of food in it.
+     */
     private void redrawAnthill()
     {
         double radius = Math.sqrt(((float)this.food / sim.getFoodPerTile())/ Math.PI);
@@ -176,6 +183,11 @@ public class Anthill
         }
     }
 
+    /**
+     * A function that serves an ant that wants to eat.
+     * @param food food that ant wants to eat from the anthill.
+     * @return returns how much food the ant actually gets.
+     */
     public int eatFood(int food)
     {
         if(food < this.food)
@@ -188,21 +200,34 @@ public class Anthill
         return result;
     }
 
+    /**
+     * Gets X coordinate of the anthill.
+     * @return X coordinate of the anthill.
+     */
     public int getX()
     {
         return x;
     }
-
+    /**
+     * Gets Y coordinate of the anthill.
+     * @return Y coordinate of the anthill.
+     */
     public int getY()
     {
         return y;
     }
-
+    /**
+     * Gets a reference to parent simulation.
+     * @return parent simulation.
+     */
     public Simulation getSim()
     {
         return sim;
     }
-
+    /**
+     * Gets a color of ants belonging to the anthill.
+     * @return color of ants belonging to the anthill.
+     */
     public Color getAntColor()
     {
         return antColor;

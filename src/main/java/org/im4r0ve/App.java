@@ -1,9 +1,9 @@
 package org.im4r0ve;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -36,6 +36,9 @@ public class App extends Application {
     private Button apply;
     private Button stop;
     private Button reset;
+    private Label currentPopulation;
+    private Label showStepsTaken;
+    private int stepsTaken;
 
     private Map<String,TextField> textFields;
 
@@ -165,10 +168,20 @@ public class App extends Application {
     }
 
     /**
+     * Updates map and statistics after each step of the simulation
+     * @param result result of the simulation.
+     */
+    public void updateSimulation(Result result)
+    {
+        drawMap(result.getMap());
+        updateStatistics(result.getPopulation(),result.getStepsTaken());
+    }
+
+    /**
      * Draws map by iterating through 2D array of object Tile. While iterating it calculates the color
      * of each tile and displays it.
      */
-    public void drawMap(Tile[][] map)
+    private void drawMap(Tile[][] map)
     {
         var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
         for(int y = 0; y < height;++y)
@@ -181,6 +194,19 @@ public class App extends Application {
                     writer.setColor(x,y,map[x][y].getMaterial().getColor());
             }
         }
+    }
+
+    /**
+     * Displays Current population and how many steps were taken by the ants in the simulation.
+     * Labels are located int the toolbar.
+     * @param population current population
+     * @param stepsTaken steps taken by current population
+     */
+    private void updateStatistics( int population,int stepsTaken)
+    {
+        currentPopulation.setText("Current population: " + population);
+        this.stepsTaken += stepsTaken;
+        this.showStepsTaken.setText("Steps taken: " + this.stepsTaken);
     }
 
     /**
@@ -204,8 +230,18 @@ public class App extends Application {
         this.apply = new Button("Apply changes");
         this.apply.setOnAction(this::handleApply);
 
+        this.currentPopulation = new Label("Current population: 0");
+        this.showStepsTaken = new Label("Steps taken: 0");
+        this.stepsTaken = 0;
+
+        this.showStepsTaken.setMaxHeight(Double.MAX_VALUE);
+        this.showStepsTaken.setAlignment(Pos.CENTER);
+
+        this.currentPopulation.setMaxHeight(Double.MAX_VALUE);
+        this.currentPopulation.setAlignment(Pos.CENTER);
+
         HBox toolbar = new HBox();
-        toolbar.getChildren().addAll(step, start, stop,  reset, apply);
+        toolbar.getChildren().addAll(step, start, stop,  reset, apply, currentPopulation,showStepsTaken);
         toolbar.setSpacing(5);
         return toolbar;
     }
@@ -282,24 +318,12 @@ public class App extends Application {
 
     /**
      * Handles the press of step button in the toolbar.
-     * Updates the map by calling step on the simulation in the new thread and
-     * then the main thread shows the map when it has time.
+     * Does one step in the simulation.
      */
     private void handleStep(ActionEvent actionEvent)
     {
         setApplicationState(States.SIMULATING);
-        Thread taskThread = new Thread(() ->
-        {
-            Tile[][] newMap = new Tile[width][height];
-            for (Simulation simulation : simulations)
-            {
-                newMap = simulation.step();
-            }
-
-            Tile[][] finalNewMap = newMap;
-            Platform.runLater(() -> drawMap(finalNewMap));
-        });
-        taskThread.start();
+        simulator.step();
     }
 
     /**

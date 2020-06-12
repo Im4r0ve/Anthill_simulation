@@ -38,13 +38,11 @@ public class Simulation
      * Spawns food and calls step on all anthills on the map.
      * @return returns Map, so Application can draw it.
      */
-    public Tile[][] step()
+    public Result step()
     {
         System.out.println("Step_____________________________________________________________________________________");
         spawnFood();
-        int population = anthill.step();
-
-        return map;
+        return new Result(map,anthill.step(),anthill.step());
     }
 
     /**
@@ -56,16 +54,20 @@ public class Simulation
         Random random = new Random();
         if(random.nextDouble() <= foodSpawnProbability)
         {
-            int centerX;
-            int centerY;
+            int centerX = random.nextInt(width);
+            int centerY = random.nextInt(height);
             double radius = Math.sqrt(((float)foodSpawnAmount / foodPerTile)/ Math.PI);
             int offset = (int)Math.ceil(radius);
             //skips already filled positions
-            do
+            for(int i = 0; getTile(centerX,centerY).getMaterial() != Material.GRASS;++i)
             {
+                if (i == 10)
+                {
+                    return;
+                }
                 centerX = random.nextInt(width);
                 centerY = random.nextInt(height);
-            }while(getTile(centerX,centerY).getMaterial() != Material.GRASS);
+            }
             int tempFoodSpawnAmount = foodSpawnAmount;
             for (int y = centerY-offset; y < centerY+offset; y++) {
                 for (int x = centerX-offset; x < centerX+offset; x++) {
