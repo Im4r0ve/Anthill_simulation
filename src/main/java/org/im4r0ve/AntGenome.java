@@ -8,7 +8,6 @@ public class AntGenome
     private float viewRange;
     private int weight;
 
-    public AntGenome(){}
     public AntGenome(int health, int weight,  int speed,int strength, float viewRange)
     {
         this.health = health;

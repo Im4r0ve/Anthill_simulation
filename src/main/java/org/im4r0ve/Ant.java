@@ -76,10 +76,10 @@ public class Ant {
                     //Ant is besides food
                     if (interests.get(i + 2) == 1)
                     {
-                        System.out.println("Picking up food: " + tile.getFood());
+                        System.out.println("Picking up food: Available" + tile.getFood());
                         System.out.println(food + " "+ strength);
                         pickUpFood(tile.removeFood(strength));
-                        System.out.println(food);
+                        System.out.println("Food now " + food);
                         state = States.GOING_HOME; //maybe add what happens when Ant can carry more
                         cleanUpBFS(x, y);
                         break;

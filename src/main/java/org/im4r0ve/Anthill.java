@@ -22,6 +22,9 @@ public class Anthill
     private int[][] pheromoneMap;
     private int basePheromoneLevel;
 
+    /**
+     * Initializes Anthill and spawn initial number of ants
+     */
     public Anthill(int x, int y,Simulation sim,ArrayList<AntGenome> antGenomes, int initAnts, double reproductionRate, int basePheromoneLevel, Color antColor)
     {
         this.x = x;
@@ -48,6 +51,12 @@ public class Anthill
         }
     }
 
+    /**
+     * Removes all dead ants that belong to this anthill.
+     * Moves all ants.
+     * Decreases pheromone values on the map.
+     * Spawns new ants if there is enough food in the anthill
+     */
     public void step()
     {
         ants.removeIf(Ant::isDead);
@@ -63,6 +72,9 @@ public class Anthill
             spawnAnt();
     }
 
+    /**
+     * Spawns new ants if there is enough food in the anthill
+     */
     private void spawnAnt()
     {
         if (food >= antGenomes.get(0).getHealth())
@@ -76,12 +88,12 @@ public class Anthill
     //                                              GETTERS/SETTERS
     //__________________________________________________________________________________________________________________
 
-    public void removeAnt(Ant ant)
-    {
-        ants.remove(ant);
-    }
-
-
+    /**
+     * Gets pheromone value from the map
+     * @param x coordinate
+     * @param y coordinate
+     * @return pheromone value
+     */
     public int getPheromone(int x, int y)
     {
         int width = sim.getWidth();
@@ -93,6 +105,12 @@ public class Anthill
         return pheromoneMap[x][y];
     }
 
+    /**
+     * Adds pheromone to the map
+     * @param x coordinate
+     * @param y coordinate
+     * @param value
+     */
     public void addPheromone(int x, int y, int value)
     {
         int width = sim.getWidth();
@@ -104,7 +122,10 @@ public class Anthill
             pheromoneMap[x][y] += value;
     }
 
-    public void removePheromone()
+    /**
+     * Decreases pheromone value for the whole map each step.
+     */
+    private void removePheromone()
     {
         for(int i = 0; i < sim.getHeight(); ++i)
         {
@@ -130,6 +151,7 @@ public class Anthill
     public void removeFood(int food)
     {
         this.food -= food;
+        //destroys the anthill
     }
 
     public int getX()
@@ -150,10 +172,5 @@ public class Anthill
     public Color getAntColor()
     {
         return antColor;
-    }
-
-    public void setAntColor(Color antColor)
-    {
-        this.antColor = antColor;
     }
 }

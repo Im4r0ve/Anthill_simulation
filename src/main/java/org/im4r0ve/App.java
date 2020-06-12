@@ -3,6 +3,7 @@ package org.im4r0ve;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -18,8 +19,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * JavaFX App
+ * Main class that generates the whole user interface and handles all of the user input
  */
 public class App extends Application {
     enum States {
@@ -27,6 +29,7 @@ public class App extends Application {
         EVOLVING,
         SIMULATING
     }
+    private Image defaultImage;
     private States state;
     private Accordion settings;
     private Canvas displayedMap;
@@ -71,6 +74,10 @@ public class App extends Application {
         initialize();
     }
 
+    /**
+     * Function initialize() gets values of variables from corresponding text fields and initializes
+     * all of the data structures based on variables
+     */
     private void initialize()
     {
         maxFoodPerTile = Integer.parseInt(textFields.get("Max food on tile:").getText());
@@ -83,11 +90,16 @@ public class App extends Application {
         basePheromoneLevel = Integer.parseInt(textFields.get("Base pheromone level:").getText());
         antColor = Color.web(textFields.get("Ant color:").getText());
         millisPerFrame = Integer.parseInt(textFields.get("millis/frame:").getText());
-        
+
+        processImage(defaultImage);
         initSimulation();
         setApplicationState(States.EDITING);
     }
 
+    /**
+     * InitMainView generates all of the visible UI
+     * @param primaryStage - Main window of the application
+     */
     private void initMainView(Stage primaryStage)
     {
         primaryStage.setTitle("Anthill simulator");
@@ -99,7 +111,7 @@ public class App extends Application {
         generateSettings();
         VBox vboxSettings = new VBox(settings);
 
-        processImage();
+        loadImage();
         Group canvas = new Group(displayedMap);
 
         HBox hbox = new HBox(vboxSettings,canvas);
@@ -111,7 +123,25 @@ public class App extends Application {
         primaryStage.setScene(new Scene (vbox));
     }
 
-    private void initAntGenomes()
+    /**
+     * initialization of all the simulations
+     */
+    private void initSimulation()
+    {
+        simulations = new ArrayList<>();
+
+        for (int i = 0; i < 1; ++i) //multiple simulations will be needed for faster work with genetic algorithms
+        {
+            simulations.add(new Simulation(clone(map), maxFoodPerTile, foodSpawnAmount, foodSpawnProbability,
+                    x, y, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor));
+        }
+        simulator = new Simulator(simulations.get(0),this,millisPerFrame);
+    }
+
+    /**
+     * Updates all AntGenomes after pressing Apply changes
+     */
+    private void updateAntGenomes()
     {
         int size = antGenomes.size();
         antGenomes = new ArrayList<>();
@@ -127,18 +157,11 @@ public class App extends Application {
         }
     }
 
-    private void initSimulation()
-    {
-        simulations = new ArrayList<>();
-
-        for (int i = 0; i < 1; ++i) //generations pool
-        {
-            simulations.add(new Simulation(clone(map), maxFoodPerTile, foodSpawnAmount, foodSpawnProbability,
-            x, y, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor));
-        }
-        simulator = new Simulator(simulations.get(0),this,millisPerFrame);
-    }
-
+    /**
+     * Draws map by iterating through 2D array of object Tile. While iterating it calculates the color
+     * of each tile and displays it.
+     * @param map
+     */
     public void drawMap(Tile[][] map)
     {
         var writer = displayedMap.getGraphicsContext2D().getPixelWriter();
@@ -154,6 +177,10 @@ public class App extends Application {
         }
     }
 
+    /**
+     * Generates the top toolbar of the UI
+     * @return Returns an object of horizontally stacked buttons
+     */
     private HBox generateToolbar()
     {
         Button step = new Button("Step");
@@ -177,6 +204,10 @@ public class App extends Application {
         return toolbar;
     }
 
+    /**
+     * Generates accordion style settings on the left side of the UI.
+     * For now it is also responsible for setting up default values of Simulation and AntGenomes
+     */
     private void generateSettings()
     {
         settings = new Accordion();
@@ -195,6 +226,9 @@ public class App extends Application {
         addAntGenome(200,100,3,200,5);
     }
 
+    /**
+     * Adds anthill Titled Pane to the settings panel.
+     */
     private void addAnthill()
     {
         VBox vBox = new VBox();
@@ -211,6 +245,9 @@ public class App extends Application {
         settings.getPanes().add(newAnthill);
     }
 
+    /**
+     * Adds AntGenome Titled Pane to the settings panel.
+     */
     private void addAntGenome(int health,int weight, int speed,int strength, float viewRange)
     {
         VBox vBox = new VBox();
@@ -267,16 +304,19 @@ public class App extends Application {
     private void handleApply(ActionEvent actionEvent)
     {
         initialize();
-        initAntGenomes();
+        updateAntGenomes();
     }
 
     //__________________________________________________________________________________________________________________
     //                                              UTILS
     //__________________________________________________________________________________________________________________
 
-    private void processImage()
+    /**
+     * Loads image of a map from predefined path and creates a map that is displayed in the window.
+     */
+    private void loadImage()
     {
-        Image defaultImage = new Image("file:resources/map2.png");
+        defaultImage = new Image("file:resources/map2.png");
         height = (int)defaultImage.getHeight();
         width = (int)defaultImage.getWidth();
 
@@ -284,31 +324,32 @@ public class App extends Application {
         double minScale =  Math.min(600 / width,600 / height);
         displayedMap.setScaleX(minScale);
         displayedMap.setScaleY(minScale);
-
-        map = loadImage(defaultImage);
-        drawMap(map);
     }
-
-    private Tile[][] loadImage(Image image)
+    /**
+     * Processes defaultImage by reading it's colors and creating internal Tile[][] map based on material that they represent.
+     */
+    private void processImage(Image image)
     {
         if(image.isError())
         {
-            System.out.println("Error: empty image");
-            return null;
+            System.err.println("Error: empty image");
         }
 
-        Tile[][] newMap = new Tile[width][height];
+        map = new Tile[width][height];
         var reader = image.getPixelReader();
         for(int y = 0; y < height;++y)
         {
             for(int x = 0; x < width;++x)
             {
-                newMap[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile, x, y);
+                map[x][y] = new Tile(reader.getColor(x,y), maxFoodPerTile, x, y);
             }
         }
-        return newMap;
+        drawMap(map);
     }
-
+    /**
+     * Copies one Tile[][] to another.
+     * It is needed for resetting the map.
+     */
     private Tile[][] clone(Tile[][] toCopy)
     {
         Tile[][] copy = new Tile[width][height];
@@ -320,6 +361,10 @@ public class App extends Application {
         return copy;
     }
 
+    /**
+     * Changes application states and blocks buttons that should not be used,
+     * @param state new state of application
+     */
     private void setApplicationState(States state)
     {
         if (state == this.state)
@@ -341,12 +386,21 @@ public class App extends Application {
         this.state = state;
     }
 
+    /**
+     * Creates formatted label and TextField next to it that is responsible for changing variables.
+     * @param label for better clarity and also serves as identifier for accessing textFields.
+     * @param defaultText of the textField.
+     * @return returns one HBox, which consist of one Label and TextField next to it.
+     */
     public HBox createTextField(String label, String defaultText)
     {
         Label myLabel = new Label(label);
         myLabel.setFont(new Font("Arial", 13));
+        myLabel.setPadding(new Insets(5, 5, 5, 5));
 
         TextField textField = new TextField(defaultText);
+        textField.setPadding(new Insets(5, 5, 5, 5));
+
         textFields.put(label,textField);
         return (new HBox(myLabel, textField));
     }

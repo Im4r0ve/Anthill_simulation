@@ -6,12 +6,22 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.util.Duration;
 
+/**
+ * Simulation driver. Simulates and draws simulation.
+ * Implements timeline that allows us to start and stop the simulation.
+ */
 public class Simulator
 {
     private App app;
     private Simulation simulation;
     private Timeline timeline;
 
+    /**
+     * Constructor of the simulator.
+     * @param simulation ref to simulation that we want to show.
+     * @param app for drawing the map.
+     * @param millisPerFrame speed of simulation.
+     */
     public Simulator(Simulation simulation, App app, int millisPerFrame)
     {
         this.timeline = new Timeline(new KeyFrame(Duration.millis(millisPerFrame), this::step));

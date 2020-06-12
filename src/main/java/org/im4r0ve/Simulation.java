@@ -29,6 +29,10 @@ public class Simulation
         this.anthill = new Anthill(x, y,this, antGenomes, initAnts, reproductionRate, basePheromoneLevel, antColor);
     }
 
+    /**
+     * Spawns food and calls step on all anthills on the map.
+     * @return returns Map, so Application can draw it.
+     */
     public Tile[][] step()
     {
         System.out.println("Step_____________________________________________________________________________________");
@@ -38,6 +42,10 @@ public class Simulation
         return map;
     }
 
+    /**
+     * Spawns randomly food every step of the simulation. Spawns it only on GRASS and based on foodSpawnAmount and maxFoodPerTile
+     * creates a circle of food on the map.
+     */
     private void spawnFood()
     {
         Random random = new Random();
@@ -68,7 +76,10 @@ public class Simulation
             }
         }
     }
-
+    /**
+     * Gets Tile at coordinates x,y from the map.
+     * You can use indexes from -width to infinity and it returns x and y from within the bounds of the map.
+     */
     public Tile getTile(int x, int y)
     {
         x = Utils.wrapAroundCoordinate(x,width);
@@ -76,12 +87,17 @@ public class Simulation
 
         return map[x][y];
     }
-
+    /**
+     * Gets height of the map
+     */
     public int getHeight()
     {
         return height;
     }
 
+    /**
+     * Gets width of the map
+     */
     public int getWidth()
     {
         return width;
